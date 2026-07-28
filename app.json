@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "모바일신분증",
+    "slug": "mobileid-v2",
+    "version": "5.5.0",
+    "orientation": "portrait",
+    "scheme": "mobileid",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#1A5CFF",
+      "resizeMode": "contain"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "kr.go.mobileid.v2",
+      "infoPlist": {
+        "NSCameraUsageDescription": "QR 코드 스캔 및 얼굴 인증을 위해 카메라를 사용합니다.",
+        "NSFaceIDUsageDescription": "간편 인증을 위해 Face ID를 사용합니다."
+      }
+    },
+    "android": {
+      "package": "kr.go.mobileid.v2",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.VIBRATE"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "QR 코드 스캔 및 얼굴 인증을 위해 카메라를 사용합니다."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "간편 인증을 위해 Face ID를 사용합니다."
+        }
+      ]
+    ]
+  }
+}

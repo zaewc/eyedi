@@ -6,11 +6,7 @@
     "orientation": "portrait",
     "scheme": "mobileid",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "splash": {
-      "backgroundColor": "#1A5CFF",
-      "resizeMode": "contain"
-    },
+    "backgroundColor": "#1A5CFF",
     "assetBundlePatterns": [
       "**/*"
     ],

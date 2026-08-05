@@ -11,7 +11,9 @@
       "backgroundColor": "#1A5CFF",
       "resizeMode": "contain"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "kr.go.mobileid.v2",
@@ -40,7 +42,8 @@
         {
           "faceIDPermission": "간편 인증을 위해 Face ID를 사용합니다."
         }
-      ]
+      ],
+      "expo-asset"
     ]
   }
 }

@@ -48,13 +48,13 @@ export const mockResidentCertificate: ResidentCertificate = {
   isMasking: true,
   isOnline: true,
   isSelected: false,
-  name: '홍길동',
-  birthday: '1990-01-01',
+  name: '송재욱',
+  birthday: '2007-07-28',
   sex: '남',
-  address: '서울특별시 종로구 세종대로 209',
-  ihidNum: '900101-1******',
+  address: '광주전남통합특별시 남구 봉선중앙로 46, 107동 1001호 (봉선동, 삼익아파트)',
+  ihidNum: '070728-3553310',
   issude: '2022-11-10',
-  issuernm: '종로구청장',
+  issuernm: '광주광역시 남구청장',
   foreignflag: 'N',
 };
 

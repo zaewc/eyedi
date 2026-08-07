@@ -4,26 +4,30 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { colors, cardText, fonts } from '@/theme';
 import { MobileId, vcTypeName, VcStatus, VC_STATUS_LABEL } from '@/types';
+import Taegeuk from './Taegeuk';
 
 const logo = require('../../assets/img/logo.png');
-const BG_MDL = require('../../assets/img/card_bg_mdl.png');
-const BG_MRC = require('../../assets/img/card_bg_mrc.png');
 
-const CARD_RATIO = 1.585; // 실물 신분증(ISO ID-1) 가로:세로
+const BG: Record<string, number> = {
+  mdriverlic: require('../../assets/img/cards/bg_mdl.png'),
+  identitycard: require('../../assets/img/cards/bg_mrc.png'),
+  rsdcard: require('../../assets/img/cards/bg_mrc.png'),
+  nationmerit: require('../../assets/img/cards/bg_mnh.png'),
+  indepatriot: require('../../assets/img/cards/bg_mnh.png'),
+  prmntrsdcard: require('../../assets/img/cards/bg_mep.png'),
+  ovkorrsdcard: require('../../assets/img/cards/bg_mep.png'),
+};
 
-function bgFor(vcType: string): number | null {
-  switch (vcType) {
-    case 'mdriverlic':
-      return BG_MDL;
-    case 'identitycard':
-    case 'rsdcard':
-    case 'nationmerit':
-    case 'indepatriot':
-      return BG_MRC;
-    default:
-      return null;
-  }
-}
+const SEAL: Record<string, number> = {
+  identitycard: require('../../assets/img/cards/seal_mrc.png'),
+  rsdcard: require('../../assets/img/cards/seal_mrc.png'),
+  nationmerit: require('../../assets/img/cards/seal_mnh.png'),
+  indepatriot: require('../../assets/img/cards/seal_mnh.png'),
+  prmntrsdcard: require('../../assets/img/cards/seal_mep.png'),
+  ovkorrsdcard: require('../../assets/img/cards/seal_mep.png'),
+};
+
+const CARD_RATIO = 1.585;
 
 function engTitle(vcType: string): string {
   switch (vcType) {
@@ -35,6 +39,9 @@ function engTitle(vcType: string): string {
     case 'nationmerit':
     case 'indepatriot':
       return 'National Merit';
+    case 'prmntrsdcard':
+    case 'ovkorrsdcard':
+      return 'Registration Card';
     default:
       return 'Mobile ID';
   }
@@ -66,12 +73,14 @@ export default function RealIdCard({ id, width, variant = 'front', onPress }: Pr
   const a = id as any;
   const name = (a.name as string) ?? '';
   const rrn = full ? a.ihidNum ?? '' : maskRrn(a.ihidNum);
-  const bg = bgFor(id.vcType);
+  const bg = BG[id.vcType] ?? null;
+  const seal = SEAL[id.vcType] ?? null;
   const statusOk = id.vcStatus === VcStatus.NORMAL;
 
-  const pad = Math.round(width * 0.05);
-  const photoW = Math.round(width * 0.2);
+  const pad = Math.round(width * 0.048);
+  const photoW = Math.round(width * 0.19);
   const photoH = Math.round(photoW * 1.28);
+  const sealSz = Math.round(height * 0.26);
 
   const extra: { label: string; value: string }[] = [];
   if (id.vcType === 'mdriverlic') {
@@ -80,19 +89,21 @@ export default function RealIdCard({ id, width, variant = 'front', onPress }: Pr
     if (a.aptdInspectEnd) extra.push({ label: '적성검사', value: `~ ${a.aptdInspectEnd}` });
   }
   if (a.address) extra.push({ label: '주소', value: a.address });
-  extra.push({ label: '발급일', value: id.vcIssuanceDate });
 
   const Inner = (
     <View style={[styles.inner, { padding: pad }]}>
-      {/* 헤더 */}
+      {/* 헤더: 제목 + 태극 엠블럼 */}
       <View style={styles.header}>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.type, { color: ink }]} numberOfLines={1}>
-            {vcTypeName(id.vcType)}
-          </Text>
-          <Text style={[styles.eng, { color: ink }]}>{engTitle(id.vcType)}</Text>
+        <View style={styles.headerLeft}>
+          <Image source={logo} style={styles.logo} resizeMode="contain" />
+          <View>
+            <Text style={[styles.type, { color: ink }]} numberOfLines={1}>
+              {vcTypeName(id.vcType)}
+            </Text>
+            <Text style={[styles.eng, { color: ink }]}>{engTitle(id.vcType)}</Text>
+          </View>
         </View>
-        <Image source={logo} style={styles.logo} resizeMode="contain" />
+        <Taegeuk size={Math.round(height * 0.16)} />
       </View>
 
       {/* 본문: 사진 + 정보 */}
@@ -101,10 +112,8 @@ export default function RealIdCard({ id, width, variant = 'front', onPress }: Pr
           <PortraitSilhouette width={photoW} height={photoH} tint={ink} />
         </View>
         <View style={styles.info}>
-          <View style={styles.nameRow}>
-            <Text style={[styles.name, { color: ink }]} numberOfLines={1}>{name}</Text>
-            {!!rrn && <Text style={[styles.rrn, { color: ink }]} numberOfLines={1}>{rrn}</Text>}
-          </View>
+          <Text style={[styles.name, { color: ink }]} numberOfLines={1}>{name}</Text>
+          {!!rrn && <Text style={[styles.rrn, { color: ink }]} numberOfLines={1}>{rrn}</Text>}
           {extra.slice(0, full ? extra.length : 2).map((f) => (
             <View key={f.label} style={styles.fieldRow}>
               <Text style={[styles.fieldLabel, { color: ink }]}>{f.label}</Text>
@@ -114,10 +123,15 @@ export default function RealIdCard({ id, width, variant = 'front', onPress }: Pr
         </View>
       </View>
 
-      {/* 푸터 */}
+      {/* 푸터: 발급기관/발급일 + 인장 */}
       <View style={styles.footer}>
-        <Text style={[styles.validity, { color: ink }]}>유효기간 ~ {id.vcExpirationDate}</Text>
-        <Text style={[styles.issuer, { color: ink }]} numberOfLines={1}>{issuerName(id)}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.issuer, { color: ink }]} numberOfLines={1}>{issuerName(id)}</Text>
+          <Text style={[styles.validity, { color: ink }]}>
+            {id.vcIssuanceDate} · 유효기간 ~ {id.vcExpirationDate}
+          </Text>
+        </View>
+        {seal && <Image source={seal} style={{ width: sealSz, height: sealSz }} resizeMode="contain" />}
       </View>
 
       {!statusOk && (
@@ -153,7 +167,7 @@ export default function RealIdCard({ id, width, variant = 'front', onPress }: Pr
 function PortraitSilhouette({ width, height, tint }: { width: number; height: number; tint: string }) {
   return (
     <Svg width={width} height={height} viewBox="0 0 100 128">
-      <Rect x={0} y={0} width={100} height={128} rx={4} fill="#FFFFFF" opacity={0.55} />
+      <Rect x={0} y={0} width={100} height={128} rx={4} fill="#FFFFFF" opacity={0.6} />
       <Circle cx={50} cy={44} r={22} fill={tint} opacity={0.28} />
       <Path d="M14,120 C14,88 30,74 50,74 C70,74 86,88 86,120 Z" fill={tint} opacity={0.28} />
     </Svg>
@@ -175,28 +189,22 @@ const styles = StyleSheet.create({
   },
   bgImage: { borderRadius: 16 },
   inner: { flex: 1, justifyContent: 'space-between' },
-  header: { flexDirection: 'row', alignItems: 'flex-start' },
-  type: { fontFamily: fonts.bold, fontSize: 18 },
-  eng: { fontFamily: fonts.regular, fontSize: 10, opacity: 0.65, marginTop: 1 },
-  logo: { width: 26, height: 26 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
+  logo: { width: 24, height: 24 },
+  type: { fontFamily: fonts.bold, fontSize: 17 },
+  eng: { fontFamily: fonts.regular, fontSize: 9.5, opacity: 0.65, marginTop: 1 },
   body: { flexDirection: 'row', gap: 12, flex: 1, alignItems: 'center' },
-  photo: {
-    borderRadius: 5,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
+  photo: { borderRadius: 5, borderWidth: 1, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   info: { flex: 1, justifyContent: 'center' },
-  nameRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 },
   name: { fontFamily: fonts.bold, fontSize: 20 },
-  rrn: { fontFamily: fonts.bold, fontSize: 15, letterSpacing: 0.3 },
-  fieldRow: { flexDirection: 'row', marginTop: 5 },
-  fieldLabel: { fontFamily: fonts.semibold, fontSize: 11, width: 52, opacity: 0.75 },
-  fieldValue: { fontFamily: fonts.regular, fontSize: 11.5, flex: 1 },
-  footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  validity: { fontFamily: fonts.regular, fontSize: 10, opacity: 0.7 },
-  issuer: { fontFamily: fonts.bold, fontSize: 14, flexShrink: 1 },
+  rrn: { fontFamily: fonts.bold, fontSize: 15, letterSpacing: 0.3, marginTop: 2 },
+  fieldRow: { flexDirection: 'row', marginTop: 4 },
+  fieldLabel: { fontFamily: fonts.semibold, fontSize: 10.5, width: 50, opacity: 0.75 },
+  fieldValue: { fontFamily: fonts.regular, fontSize: 11, flex: 1 },
+  footer: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
+  issuer: { fontFamily: fonts.bold, fontSize: 14 },
+  validity: { fontFamily: fonts.regular, fontSize: 9.5, opacity: 0.7, marginTop: 2 },
   statusBadge: {
     position: 'absolute',
     top: 0,

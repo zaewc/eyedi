@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MainTabParamList } from './types';
-import { colors, typography } from '@/theme';
+import { colors, fonts } from '@/theme';
 import WalletScreen from '@/screens/main/WalletScreen';
 import ApplyScreen from '@/screens/main/ApplyScreen';
 import MenuScreen from '@/screens/menu/MenuScreen';
@@ -16,8 +16,8 @@ export default function MainTabs() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textTertiary,
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
-        tabBarStyle: { borderTopColor: colors.divider, height: 60, paddingBottom: 8, paddingTop: 6 },
+        tabBarLabelStyle: { fontSize: 12, fontFamily: fonts.semibold },
+        tabBarStyle: { borderTopColor: colors.divider, height: 62, paddingBottom: 8, paddingTop: 6 },
       }}
     >
       <Tab.Screen

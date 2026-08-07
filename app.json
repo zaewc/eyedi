@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "scheme": "mobileid",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#1A5CFF",
+    "backgroundColor": "#FFFFFF",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -39,7 +39,8 @@
           "faceIDPermission": "간편 인증을 위해 Face ID를 사용합니다."
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      "expo-font"
     ]
   }
 }

@@ -1,8 +1,11 @@
 import React from 'react';
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { Image, StyleSheet, Text, View, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, cardText, radius, spacing, fonts } from '@/theme';
 import { MobileId, vcTypeName, VC_STATUS_LABEL, VcStatus } from '@/types';
+import Taegeuk from './Taegeuk';
+
+const logo = require('../../assets/img/logo.png');
 
 function cardColors(vcType: string): [string, string] {
   switch (vcType) {
@@ -25,107 +28,122 @@ function cardColors(vcType: string): [string, string] {
 interface Props {
   id: MobileId;
   onPress?: () => void;
-  compact?: boolean;
 }
 
-export default function IdCard({ id, onPress, compact }: Props) {
+export default function IdCard({ id, onPress }: Props) {
   const [c1, c2] = cardColors(id.vcType);
+  const ink = cardText[id.vcType] ?? colors.navyText;
   const name = (id as any).name as string | undefined;
-  const holder = name ?? '';
-  const subtitle = getSubtitle(id);
+  const number = getNumber(id);
   const statusOk = id.vcStatus === VcStatus.NORMAL;
 
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [pressed && { opacity: 0.92 }]}>
+    <Pressable onPress={onPress} style={({ pressed }) => [pressed && { opacity: 0.94 }]}>
       <LinearGradient
         colors={[c1, c2]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.card, compact && styles.compact]}
+        style={styles.card}
       >
-        <View style={styles.header}>
-          <View style={styles.emblem}>
-            <Text style={styles.emblemText}>대한민국</Text>
-          </View>
-          <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: statusOk ? 'rgba(255,255,255,0.22)' : colors.danger },
-            ]}
-          >
+        {!statusOk && (
+          <View style={styles.statusBadge}>
             <Text style={styles.statusText}>{VC_STATUS_LABEL[id.vcStatus]}</Text>
           </View>
-        </View>
+        )}
 
-        <Text style={styles.typeName}>{vcTypeName(id.vcType)}</Text>
-
-        <View style={styles.body}>
+        <View style={styles.row}>
           <View style={styles.photo}>
-            <Text style={styles.photoPlaceholder}>{holder.slice(0, 1) || '증'}</Text>
+            <Text style={styles.photoInitial}>{name?.slice(0, 1) ?? '증'}</Text>
           </View>
+
           <View style={styles.info}>
-            <Text style={styles.holder}>{holder}</Text>
-            {!!subtitle && <Text style={styles.sub}>{subtitle}</Text>}
+            <Text style={[styles.typeName, { color: ink }]} numberOfLines={1}>
+              {vcTypeName(id.vcType)}
+            </Text>
+
+            <View style={styles.symbolRow}>
+              <View style={[styles.dot, { backgroundColor: ink, opacity: 0.35 }]} />
+              <View style={[styles.dot, { backgroundColor: ink, opacity: 0.35 }]} />
+              <View style={[styles.dot, { backgroundColor: ink, opacity: 0.35 }]} />
+              <Taegeuk size={26} />
+            </View>
+
+            {!!number && (
+              <Text style={[styles.number, { color: ink }]} numberOfLines={1}>
+                {number}
+              </Text>
+            )}
+            {!!name && (
+              <Text style={[styles.holder, { color: ink }]} numberOfLines={1}>
+                {name}
+              </Text>
+            )}
           </View>
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            발급일 {id.vcIssuanceDate} · 유효기간 {id.vcExpirationDate}
-          </Text>
+          <Image source={logo} style={styles.logo} resizeMode="contain" />
+          <Text style={[styles.footerText, { color: ink }]}>~ {id.vcExpirationDate}</Text>
         </View>
       </LinearGradient>
     </Pressable>
   );
 }
 
-function getSubtitle(id: MobileId): string {
-  if (id.vcType === 'mdriverlic') {
-    return `${(id as any).asort ?? ''}  ${(id as any).dlNo ?? ''}`.trim();
-  }
-  if ('ihidNum' in id && (id as any).ihidNum) {
-    return (id as any).ihidNum;
-  }
-  return '';
+function getNumber(id: MobileId): string {
+  const anyId = id as any;
+  if (id.vcType === 'mdriverlic') return anyId.dlNo ?? '';
+  return anyId.ihidNum ?? '';
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: radius.xl,
+    borderRadius: 18,
     padding: spacing.lg,
-    minHeight: 220,
+    minHeight: 210,
     justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
+    borderWidth: 1,
+    borderColor: 'rgba(11,44,99,0.08)',
+    shadowColor: '#0B2C63',
+    shadowOpacity: 0.14,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
     elevation: 5,
   },
-  compact: { minHeight: 150, padding: spacing.md },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  emblem: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: radius.sm,
-    backgroundColor: 'rgba(255,255,255,0.18)',
+  statusBadge: {
+    position: 'absolute',
+    top: spacing.md,
+    right: spacing.md,
+    backgroundColor: colors.danger,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: radius.pill,
   },
-  emblemText: { color: colors.textInverse, fontSize: 12, fontWeight: '700', letterSpacing: 1 },
-  statusBadge: { paddingHorizontal: spacing.sm, paddingVertical: 4, borderRadius: radius.pill },
-  statusText: { color: colors.textInverse, fontSize: 12, fontWeight: '600' },
-  typeName: { color: colors.textInverse, fontSize: 20, fontWeight: '700', marginTop: spacing.md },
-  body: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginTop: spacing.sm },
+  statusText: { color: colors.textInverse, fontFamily: fonts.semibold, fontSize: 11 },
+  row: { flexDirection: 'row', gap: spacing.md },
   photo: {
-    width: 56,
-    height: 72,
-    borderRadius: radius.sm,
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    width: 92,
+    height: 116,
+    borderRadius: 6,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: 'rgba(11,44,99,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  photoPlaceholder: { color: colors.textInverse, fontSize: 24, fontWeight: '700' },
-  info: { flex: 1 },
-  holder: { color: colors.textInverse, fontSize: 22, fontWeight: '700' },
-  sub: { color: 'rgba(255,255,255,0.85)', fontSize: 14, marginTop: 4 },
-  footer: { marginTop: spacing.md },
-  footerText: { color: 'rgba(255,255,255,0.75)', fontSize: 11 },
+  photoInitial: { fontFamily: fonts.bold, fontSize: 34, color: '#B9C4D6' },
+  info: { flex: 1, paddingTop: 2 },
+  typeName: { fontFamily: fonts.bold, fontSize: 19 },
+  symbolRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14 },
+  dot: { width: 14, height: 14, borderRadius: 7 },
+  number: { fontFamily: fonts.bold, fontSize: 20, marginTop: 12, letterSpacing: 0.5 },
+  holder: { fontFamily: fonts.semibold, fontSize: 15, marginTop: 6 },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.md,
+  },
+  logo: { width: 30, height: 30 },
+  footerText: { fontFamily: fonts.regular, fontSize: 12, opacity: 0.7 },
 });

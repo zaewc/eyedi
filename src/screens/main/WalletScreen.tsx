@@ -1,74 +1,121 @@
-import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/types';
 import IdCard from '@/components/IdCard';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, fonts, radius, spacing, typography } from '@/theme';
 import { useWalletStore } from '@/data/store/walletStore';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
+
+const { width } = Dimensions.get('window');
+const H_PAD = spacing.lg;
+const CARD_W = width - H_PAD * 2;
+
+const logo = require('../../../assets/img/logo.png');
+const illust = require('../../../assets/img/issue_complete.png');
 
 export default function WalletScreen() {
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
   const ids = useWalletStore((s) => s.ids);
+  const [page, setPage] = useState(0);
+  const listRef = useRef<FlatList>(null);
+
+  const current = ids[page] ?? ids[0];
 
   return (
     <View style={styles.root}>
       <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
-        <Text style={styles.brand}>모바일 신분증</Text>
+        <View style={styles.brandRow}>
+          <Image source={logo} style={styles.brandLogo} resizeMode="contain" />
+          <Text style={styles.brand}>모바일 신분증</Text>
+        </View>
         <View style={styles.topActions}>
           <Pressable hitSlop={10} onPress={() => navigation.navigate('Notice')}>
             <Text style={styles.topIcon}>🔔</Text>
           </Pressable>
           <Pressable hitSlop={10} onPress={() => navigation.navigate('Settings')}>
-            <Text style={styles.topIcon}>⚙️</Text>
+            <Text style={styles.topIcon}>☰</Text>
           </Pressable>
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.body}>
-        {ids.length === 0 ? (
-          <EmptyWallet onIssue={() => navigation.navigate('Apply' as never)} />
-        ) : (
-          <>
-            {ids.map((id) => (
-              <View key={id.vcId} style={styles.cardWrap}>
-                <IdCard id={id} onPress={() => navigation.navigate('IdDetail', { vcId: id.vcId })} />
+      {ids.length === 0 ? (
+        <EmptyWallet
+          illust={illust}
+          onIssue={() => navigation.navigate('Apply' as never)}
+        />
+      ) : (
+        <View style={styles.content}>
+          <FlatList
+            ref={listRef}
+            data={ids}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.vcId}
+            snapToInterval={width}
+            decelerationRate="fast"
+            contentContainerStyle={{ paddingVertical: spacing.lg }}
+            onMomentumScrollEnd={(e) =>
+              setPage(Math.round(e.nativeEvent.contentOffset.x / width))
+            }
+            renderItem={({ item }) => (
+              <View style={{ width, paddingHorizontal: H_PAD }}>
+                <IdCard
+                  id={item}
+                  onPress={() => navigation.navigate('IdDetail', { vcId: item.vcId })}
+                />
               </View>
-            ))}
-          </>
-        )}
-      </ScrollView>
+            )}
+          />
 
-      {ids.length > 0 && (
-        <View style={styles.presentBar}>
-          <Pressable
-            style={styles.scanBtn}
-            onPress={() => navigation.navigate('ScanQR')}
-          >
-            <Text style={styles.scanText}>📷  QR 스캔</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.scanBtn, styles.presentBtn]}
-            onPress={() => navigation.navigate('PresentQR', { vcId: ids[0].vcId })}
-          >
-            <Text style={[styles.scanText, styles.presentTextInv]}>제시하기</Text>
-          </Pressable>
+          {ids.length > 1 && (
+            <View style={styles.dots}>
+              {ids.map((_, i) => (
+                <View key={i} style={[styles.dot, i === page && styles.dotActive]} />
+              ))}
+            </View>
+          )}
+
+          <View style={styles.actions}>
+            <Pressable
+              style={styles.qrButton}
+              onPress={() => current && navigation.navigate('PresentQR', { vcId: current.vcId })}
+            >
+              <View style={styles.qrGlyph}>
+                <Text style={styles.qrGlyphText}>▣</Text>
+              </View>
+              <Text style={styles.qrButtonText}>본인확인 QR 제시</Text>
+            </Pressable>
+
+            <Pressable style={styles.scanButton} onPress={() => navigation.navigate('ScanQR')}>
+              <Text style={styles.scanButtonText}>QR 스캔하기</Text>
+            </Pressable>
+          </View>
         </View>
       )}
     </View>
   );
 }
 
-function EmptyWallet({ onIssue }: { onIssue: () => void }) {
+function EmptyWallet({ illust, onIssue }: { illust: number; onIssue: () => void }) {
   return (
     <View style={styles.empty}>
-      <Text style={styles.emptyIcon}>🪪</Text>
+      <Image source={illust} style={styles.emptyImg} resizeMode="contain" />
       <Text style={styles.emptyTitle}>등록된 신분증이 없습니다</Text>
-      <Text style={styles.emptyDesc}>발급 탭에서 모바일 신분증을 발급받으세요.</Text>
+      <Text style={styles.emptyDesc}>모바일 신분증을 발급받아 보세요.</Text>
       <Pressable style={styles.emptyBtn} onPress={onIssue}>
         <Text style={styles.emptyBtnText}>신분증 발급받기</Text>
       </Pressable>
@@ -83,48 +130,55 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
+    paddingBottom: spacing.md,
     backgroundColor: colors.background,
   },
-  brand: { ...typography.h3, color: colors.primary },
-  topActions: { flexDirection: 'row', gap: spacing.md },
-  topIcon: { fontSize: 20 },
-  body: { padding: spacing.lg, gap: spacing.lg, paddingBottom: 120 },
-  cardWrap: {},
-  empty: { alignItems: 'center', paddingTop: 80 },
-  emptyIcon: { fontSize: 64, marginBottom: spacing.lg },
-  emptyTitle: { ...typography.h3, marginBottom: spacing.sm },
-  emptyDesc: { ...typography.bodySecondary, textAlign: 'center', marginBottom: spacing.xl },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  brandLogo: { width: 26, height: 26 },
+  brand: { fontFamily: fonts.bold, fontSize: 18, color: colors.navyText },
+  topActions: { flexDirection: 'row', gap: spacing.md, alignItems: 'center' },
+  topIcon: { fontSize: 20, color: colors.navyText },
+  content: { flex: 1 },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: -spacing.sm },
+  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.border },
+  dotActive: { backgroundColor: colors.primary, width: 18 },
+  actions: { paddingHorizontal: spacing.lg, marginTop: 'auto', paddingBottom: spacing.lg, gap: spacing.sm },
+  qrButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    height: 58,
+    borderRadius: radius.md,
+    backgroundColor: colors.primary,
+    shadowColor: colors.primary,
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+  },
+  qrGlyph: { width: 26, height: 26, alignItems: 'center', justifyContent: 'center' },
+  qrGlyphText: { fontSize: 22, color: colors.textInverse },
+  qrButtonText: { fontFamily: fonts.bold, fontSize: 17, color: colors.textInverse },
+  scanButton: {
+    height: 52,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  scanButtonText: { fontFamily: fonts.semibold, fontSize: 15, color: colors.navyText },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
+  emptyImg: { width: 200, height: 180, marginBottom: spacing.lg },
+  emptyTitle: { ...typography.h3, marginBottom: spacing.xs },
+  emptyDesc: { ...typography.bodySecondary, marginBottom: spacing.xl },
   emptyBtn: {
     backgroundColor: colors.primary,
     paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
+    paddingVertical: 14,
     borderRadius: radius.pill,
   },
-  emptyBtnText: { color: colors.textInverse, fontWeight: '600', fontSize: 15 },
-  presentBar: {
-    position: 'absolute',
-    left: spacing.lg,
-    right: spacing.lg,
-    bottom: spacing.lg,
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  scanBtn: {
-    flex: 1,
-    height: 54,
-    borderRadius: radius.md,
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  presentBtn: { backgroundColor: colors.primary, borderColor: colors.primary },
-  scanText: { color: colors.primary, fontWeight: '700', fontSize: 15 },
-  presentTextInv: { color: colors.textInverse },
+  emptyBtnText: { fontFamily: fonts.bold, color: colors.textInverse, fontSize: 15 },
 });

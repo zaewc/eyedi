@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/types';
 import { Screen, Dialog } from '@/components/common';
 import { colors, spacing, typography } from '@/theme';
+
+const cardSample = require('../../../assets/img/card_sample.png');
 import { CagHttpService } from '@/data/services/httpService';
 import { useWalletStore } from '@/data/store/walletStore';
 
@@ -47,6 +49,7 @@ export default function IssueLoadingScreen() {
   return (
     <Screen>
       <View style={styles.body}>
+        <Image source={cardSample} style={styles.cardImg} resizeMode="contain" />
         <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.title}>신분증을 발급하고 있습니다</Text>
         <View style={styles.steps}>
@@ -72,7 +75,8 @@ export default function IssueLoadingScreen() {
 }
 
 const styles = StyleSheet.create({
-  body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.xl, padding: spacing.xl },
+  body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.lg, padding: spacing.xl },
+  cardImg: { width: 220, height: 140, marginBottom: spacing.sm },
   title: { ...typography.h3 },
   steps: { alignSelf: 'stretch', gap: spacing.md, marginTop: spacing.lg },
   stepRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },

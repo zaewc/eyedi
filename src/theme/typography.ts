@@ -1,16 +1,17 @@
 import { TextStyle } from 'react-native';
 import { colors } from './colors';
+import { fonts } from './fonts';
 
 export const typography: Record<string, TextStyle> = {
-  h1: { fontSize: 26, fontWeight: '700', color: colors.text, lineHeight: 34 },
-  h2: { fontSize: 22, fontWeight: '700', color: colors.text, lineHeight: 30 },
-  h3: { fontSize: 18, fontWeight: '600', color: colors.text, lineHeight: 26 },
-  title: { fontSize: 16, fontWeight: '600', color: colors.text, lineHeight: 24 },
-  body: { fontSize: 15, fontWeight: '400', color: colors.text, lineHeight: 22 },
-  bodySecondary: { fontSize: 14, fontWeight: '400', color: colors.textSecondary, lineHeight: 20 },
-  caption: { fontSize: 12, fontWeight: '400', color: colors.textTertiary, lineHeight: 16 },
-  button: { fontSize: 16, fontWeight: '600', color: colors.textInverse },
-  label: { fontSize: 13, fontWeight: '500', color: colors.textSecondary },
+  h1: { fontFamily: fonts.bold, fontSize: 26, color: colors.text, lineHeight: 34 },
+  h2: { fontFamily: fonts.bold, fontSize: 22, color: colors.text, lineHeight: 30 },
+  h3: { fontFamily: fonts.bold, fontSize: 18, color: colors.text, lineHeight: 26 },
+  title: { fontFamily: fonts.semibold, fontSize: 16, color: colors.text, lineHeight: 24 },
+  body: { fontFamily: fonts.regular, fontSize: 15, color: colors.text, lineHeight: 22 },
+  bodySecondary: { fontFamily: fonts.regular, fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
+  caption: { fontFamily: fonts.regular, fontSize: 12, color: colors.textTertiary, lineHeight: 16 },
+  button: { fontFamily: fonts.semibold, fontSize: 16, color: colors.textInverse },
+  label: { fontFamily: fonts.medium, fontSize: 13, color: colors.textSecondary },
 };
 
 export const spacing = {

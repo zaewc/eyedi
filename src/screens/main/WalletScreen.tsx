@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   topActions: { flexDirection: 'row', gap: spacing.md, alignItems: 'center' },
   topIcon: { fontSize: 20, color: colors.navyText },
   cardArea: { flex: 1 },
-  page: { alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.md },
+  page: { alignItems: 'center', justifyContent: 'flex-start', paddingTop: spacing.lg },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginBottom: spacing.sm },
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.border },
   dotActive: { backgroundColor: colors.primary, width: 18 },

@@ -4,7 +4,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { colors, cardText, fonts } from '@/theme';
 import { MobileId, vcTypeName, VcStatus, VC_STATUS_LABEL } from '@/types';
-import Taegeuk from './Taegeuk';
 
 const logo = require('../../assets/img/logo.png');
 
@@ -92,7 +91,7 @@ export default function RealIdCard({ id, width, variant = 'front', onPress }: Pr
 
   const Inner = (
     <View style={[styles.inner, { padding: pad }]}>
-      {/* 헤더: 제목 + 태극 엠블럼 */}
+      {/* 헤더: 로고 + 제목 */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Image source={logo} style={styles.logo} resizeMode="contain" />
@@ -103,7 +102,6 @@ export default function RealIdCard({ id, width, variant = 'front', onPress }: Pr
             <Text style={[styles.eng, { color: ink }]}>{engTitle(id.vcType)}</Text>
           </View>
         </View>
-        <Taegeuk size={Math.round(height * 0.16)} />
       </View>
 
       {/* 본문: 사진 + 정보 */}

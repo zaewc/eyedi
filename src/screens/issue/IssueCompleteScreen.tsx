@@ -1,12 +1,14 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/types';
 import { Button, Screen } from '@/components/common';
-import IdCard from '@/components/IdCard';
+import RealIdCard from '@/components/RealIdCard';
 import { colors, spacing, typography } from '@/theme';
 import { useWalletStore } from '@/data/store/walletStore';
+
+const { width } = Dimensions.get('window');
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'IssueComplete'>;
 type Rt = RouteProp<RootStackParamList, 'IssueComplete'>;
@@ -24,7 +26,7 @@ export default function IssueCompleteScreen() {
         <Text style={styles.desc}>이제 모바일 신분증을 사용할 수 있습니다.</Text>
         {id && (
           <View style={styles.cardWrap}>
-            <IdCard id={id} />
+            <RealIdCard id={id} width={width * 0.62} variant="full" />
           </View>
         )}
       </View>

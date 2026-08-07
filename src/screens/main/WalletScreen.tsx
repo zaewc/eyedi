@@ -3,7 +3,6 @@ import {
   Dimensions,
   FlatList,
   Image,
-  LayoutChangeEvent,
   Pressable,
   StyleSheet,
   Text,
@@ -30,15 +29,11 @@ export default function WalletScreen() {
   const insets = useSafeAreaInsets();
   const ids = useWalletStore((s) => s.ids);
   const [page, setPage] = useState(0);
-  const [areaH, setAreaH] = useState(0);
   const listRef = useRef<FlatList>(null);
 
   const current = ids[page] ?? ids[0];
 
-  // 카드가 가용 영역에 들어오도록 폭을 계산 (세로비 1.5)
-  const maxByWidth = width - H_PAD * 2;
-  const maxByHeight = areaH > 0 ? Math.floor((areaH - 24) / 1.5) : maxByWidth;
-  const cardW = Math.min(maxByWidth, maxByHeight);
+  const cardW = width - H_PAD * 2;
 
   return (
     <View style={styles.root}>
@@ -61,11 +56,8 @@ export default function WalletScreen() {
         <EmptyWallet illust={illust} onIssue={() => navigation.navigate('Apply' as never)} />
       ) : (
         <>
-          <View
-            style={styles.cardArea}
-            onLayout={(e: LayoutChangeEvent) => setAreaH(e.nativeEvent.layout.height)}
-          >
-            {areaH > 0 && (
+          <View style={styles.cardArea}>
+            {(
               <FlatList
                 ref={listRef}
                 data={ids}

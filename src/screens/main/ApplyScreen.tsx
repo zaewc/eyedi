@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/types';
+import { Header } from '@/components/common';
 import { colors, radius, spacing, typography } from '@/theme';
 import { CagHttpService } from '@/data/services/httpService';
 import { IssuableVc } from '@/types';
@@ -12,7 +12,6 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export default function ApplyScreen() {
   const navigation = useNavigation<Nav>();
-  const insets = useSafeAreaInsets();
   const [list, setList] = useState<IssuableVc[]>([]);
 
   useEffect(() => {
@@ -21,9 +20,7 @@ export default function ApplyScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
-        <Text style={styles.brand}>신분증 발급</Text>
-      </View>
+      <Header title="신분증 발급" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.body}>
         <Text style={styles.heading}>발급 가능한 신분증</Text>
         {list.map((item) => (

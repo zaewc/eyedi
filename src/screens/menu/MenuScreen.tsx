@@ -1,9 +1,9 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/types';
+import { Header } from '@/components/common';
 import { colors, radius, spacing, typography } from '@/theme';
 import { WEB_URLS } from '@/data/services/endpoints';
 
@@ -11,7 +11,6 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export default function MenuScreen() {
   const navigation = useNavigation<Nav>();
-  const insets = useSafeAreaInsets();
 
   const sections: { title: string; items: { label: string; onPress: () => void }[] }[] = [
     {
@@ -46,9 +45,7 @@ export default function MenuScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
-        <Text style={styles.brand}>전체 메뉴</Text>
-      </View>
+      <Header title="전체 메뉴" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.body}>
         {sections.map((s) => (
           <View key={s.title} style={styles.section}>

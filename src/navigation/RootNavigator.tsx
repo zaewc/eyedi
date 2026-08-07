@@ -9,7 +9,9 @@ import PhoneAuthScreen from '@/screens/auth/PhoneAuthScreen';
 import SetPinScreen from '@/screens/password/SetPinScreen';
 import BiometricSetupScreen from '@/screens/auth/BiometricSetupScreen';
 import LockScreen from '@/screens/password/LockScreen';
-import MainTabs from './MainTabs';
+import HomeScreen from '@/screens/main/HomeScreen';
+import ApplyScreen from '@/screens/main/ApplyScreen';
+import MenuScreen from '@/screens/menu/MenuScreen';
 import IdDetailScreen from '@/screens/menu/IdDetailScreen';
 import IssueConfirmScreen from '@/screens/issue/IssueConfirmScreen';
 import IssueLoadingScreen from '@/screens/issue/IssueLoadingScreen';
@@ -40,7 +42,9 @@ export default function RootNavigator() {
 
       <Stack.Screen name="Lock" component={LockScreen} options={{ gestureEnabled: false }} />
 
-      <Stack.Screen name="Main" component={MainTabs} options={{ gestureEnabled: false }} />
+      <Stack.Screen name="Main" component={HomeScreen} options={{ gestureEnabled: false }} />
+      <Stack.Screen name="Apply" component={ApplyScreen} />
+      <Stack.Screen name="Menu" component={MenuScreen} />
       <Stack.Screen name="IdDetail" component={IdDetailScreen} />
 
       <Stack.Screen name="IssueConfirm" component={IssueConfirmScreen} />

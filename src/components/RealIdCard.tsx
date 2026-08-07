@@ -2,7 +2,7 @@ import React from 'react';
 import { Image, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
-import { colors, cardText, fonts } from '@/theme';
+import { colors, fonts } from '@/theme';
 import { MobileId, vcTypeName, VcStatus, VC_STATUS_LABEL } from '@/types';
 
 const logo = require('../../assets/img/logo.png');
@@ -26,7 +26,8 @@ const SEAL: Record<string, number> = {
   ovkorrsdcard: require('../../assets/img/cards/seal_mep.png'),
 };
 
-const CARD_RATIO = 1.585;
+const CARD_RATIO = 355 / 217; // v1 main_width/main_height
+const CARD_INK = '#3F434F'; // v1 @color/background
 
 function engTitle(vcType: string): string {
   switch (vcType) {
@@ -68,7 +69,7 @@ interface Props {
 export default function RealIdCard({ id, width, variant = 'front', onPress }: Props) {
   const full = variant === 'full';
   const height = Math.round(width / CARD_RATIO);
-  const ink = cardText[id.vcType] ?? colors.navyText;
+  const ink = CARD_INK;
   const a = id as any;
   const name = (a.name as string) ?? '';
   const rrn = full ? a.ihidNum ?? '' : maskRrn(a.ihidNum);
@@ -76,9 +77,9 @@ export default function RealIdCard({ id, width, variant = 'front', onPress }: Pr
   const seal = SEAL[id.vcType] ?? null;
   const statusOk = id.vcStatus === VcStatus.NORMAL;
 
-  const pad = Math.round(width * 0.048);
-  const photoW = Math.round(width * 0.19);
-  const photoH = Math.round(photoW * 1.28);
+  const pad = Math.round(width * 0.042);
+  const photoW = Math.round(width * 0.27);
+  const photoH = Math.round(height * 0.6);
   const sealSz = Math.round(height * 0.26);
 
   const extra: { label: string; value: string }[] = [];

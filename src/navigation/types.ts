@@ -12,6 +12,8 @@ export type RootStackParamList = {
   Lock: undefined;
 
   Main: undefined;
+  Apply: undefined;
+  Menu: undefined;
 
   IdDetail: { vcId: string };
 
@@ -31,10 +33,4 @@ export type RootStackParamList = {
 
   Notice: undefined;
   Web: { url: string; title?: string };
-};
-
-export type MainTabParamList = {
-  Wallet: undefined;
-  Apply: undefined;
-  Menu: undefined;
 };

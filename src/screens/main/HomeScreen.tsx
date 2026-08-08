@@ -74,7 +74,7 @@ export default function HomeScreen() {
       ) : (
         <>
           <View style={styles.cardArea} onLayout={(e) => setAreaH(e.nativeEvent.layout.height)}>
-            <Image source={rolling} style={styles.rolling} resizeMode="contain" pointerEvents="none" />
+            <Image source={rolling} style={styles.rolling} resizeMode="contain" />
             <View style={styles.clockRow}>
               <ClockIcon size={16} color={colors.textSecondary} />
               <Text style={styles.clockText}>{formatNow(now)}</Text>
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   topBtn: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   title: { fontFamily: fonts.bold, fontSize: 18, color: '#111111' },
   cardArea: { flex: 1, justifyContent: 'flex-start' },
-  rolling: { position: 'absolute', top: 4, right: -50, width: 230, height: 230, opacity: 0.9 },
+  rolling: { position: 'absolute', top: 4, right: -50, width: 230, height: 230, opacity: 0.9, pointerEvents: 'none' },
   clockRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: spacing.md, marginBottom: spacing.sm },
   clockText: { fontFamily: fonts.semibold, fontSize: 14, color: colors.textSecondary },
   page: { alignItems: 'center', justifyContent: 'center' },

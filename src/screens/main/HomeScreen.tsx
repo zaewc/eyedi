@@ -44,9 +44,8 @@ export default function HomeScreen() {
     return () => clearInterval(t);
   }, []);
 
-  // v1은 카드(가로 355x217)를 90° 회전해 화면에서 세로로 크게 표시한다.
-  // 카드 위 시계 영역(약 44dp)을 제외하고 크기를 줄여 배치.
-  const cardLen = Math.min((areaH - 52) * 0.82, (width - H_PAD * 2) * (355 / 217));
+  // v1은 카드(가로 355x217)를 90° 회전해 세로로 표시. v1보다 컸어서 축소.
+  const cardLen = Math.min(areaH * 0.72, (width - H_PAD * 2) * (355 / 217));
   const cardShort = cardLen / (355 / 217);
 
   return (
@@ -146,9 +145,9 @@ const styles = StyleSheet.create({
   },
   topBtn: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   title: { fontFamily: fonts.bold, fontSize: 18, color: '#111111' },
-  cardArea: { flex: 1, justifyContent: 'flex-start' },
+  cardArea: { flex: 1, justifyContent: 'center' },
   rolling: { position: 'absolute', top: 4, right: -50, width: 230, height: 230, opacity: 0.9, pointerEvents: 'none' },
-  clockRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: spacing.md, marginBottom: spacing.sm },
+  clockRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: spacing.xs },
   clockText: { fontFamily: fonts.semibold, fontSize: 14, color: colors.textSecondary },
   page: { alignItems: 'center', justifyContent: 'center' },
   dots: { position: 'absolute', bottom: 8, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 6 },

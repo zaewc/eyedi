@@ -43,6 +43,10 @@ function issuerName(id: MobileId): string {
   return a.issuerName ?? a.issuernm ?? a.engissuernm ?? '';
 }
 
+function GrayBox({ w, h, s, mt = 0 }: { w: number; h: number; s: number; mt?: number }) {
+  return <View style={{ width: w, height: h, borderRadius: 5 * s, backgroundColor: '#D9D9D9', marginTop: mt }} />;
+}
+
 function PortraitSilhouette({ w, h }: { w: number; h: number }) {
   return (
     <Svg width={w} height={h} viewBox="0 0 100 128">
@@ -82,21 +86,30 @@ function ResidentFace({ id, s, full }: { id: MobileId; s: number; full: boolean 
             {name}
           </Text>
 
-          <View style={{ flexDirection: 'row', marginTop: 3 * s }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 * s }}>
             <Text style={{ fontFamily: fonts.semibold, fontSize: 15.4 * s, color: INK, letterSpacing: 15.4 * s * 0.075 }}>
               {birthPrev}
             </Text>
             <Text style={{ fontFamily: fonts.bold, fontSize: 15.4 * s, color: INK }}>-</Text>
-            <Text style={{ fontFamily: fonts.semibold, fontSize: 15.4 * s, color: INK, letterSpacing: 15.4 * s * 0.07 }}>
-              {post}
-            </Text>
+            {full ? (
+              <Text style={{ fontFamily: fonts.semibold, fontSize: 15.4 * s, color: INK, letterSpacing: 15.4 * s * 0.07 }}>{post}</Text>
+            ) : (
+              <GrayBox w={90 * s} h={15 * s} s={s} />
+            )}
           </View>
 
-          {!!a.address && (
-            <Text numberOfLines={4} style={{ fontFamily: fonts.regular, fontSize: 12.5 * s, color: INK, marginTop: 6 * s, lineHeight: 16 * s }}>
-              {a.address}
-            </Text>
-          )}
+          {!!a.address &&
+            (full ? (
+              <Text numberOfLines={4} style={{ fontFamily: fonts.regular, fontSize: 12.5 * s, color: INK, marginTop: 6 * s, lineHeight: 16 * s }}>
+                {a.address}
+              </Text>
+            ) : (
+              <View style={{ marginTop: 8 * s }}>
+                <GrayBox w={'100%' as any} h={9 * s} s={s} />
+                <GrayBox w={'100%' as any} h={9 * s} s={s} mt={4 * s} />
+                <GrayBox w={'62%' as any} h={9 * s} s={s} mt={4 * s} />
+              </View>
+            ))}
         </View>
 
         {/* 우: 사진 */}
@@ -129,7 +142,6 @@ function DriverFace({ id, s, full }: { id: MobileId; s: number; full: boolean })
   const name = (a.name as string) ?? '';
   const rrnDigits = (a.ihidNum ?? '').replace(/[^0-9]/g, '');
   const birthPrev = rrnDigits.slice(0, 6);
-  const post = full ? rrnDigits.slice(6) : `${rrnDigits.slice(6, 7)}******`;
 
   return (
     <View style={{ flex: 1 }}>
@@ -156,14 +168,25 @@ function DriverFace({ id, s, full }: { id: MobileId; s: number; full: boolean })
 
           <View style={{ flex: 1, marginTop: 3 * s }}>
             <Text numberOfLines={1} style={{ fontFamily: fonts.bold, fontSize: 15.4 * s, color: ink }}>{name}</Text>
-            <View style={{ flexDirection: 'row' }}>
-              <Text style={{ fontFamily: fonts.bold, fontSize: 15.4 * s, color: ink }}>{birthPrev}-{post}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ fontFamily: fonts.bold, fontSize: 15.4 * s, color: ink }}>{birthPrev}-</Text>
+              {full ? (
+                <Text style={{ fontFamily: fonts.bold, fontSize: 15.4 * s, color: ink }}>{rrnDigits.slice(6)}</Text>
+              ) : (
+                <GrayBox w={82 * s} h={15 * s} s={s} />
+              )}
             </View>
-            {!!a.address && (
-              <Text numberOfLines={3} style={{ fontFamily: fonts.regular, fontSize: 10.6 * s, color: ink, marginTop: 3 * s, lineHeight: 13 * s }}>
-                {a.address}
-              </Text>
-            )}
+            {!!a.address &&
+              (full ? (
+                <Text numberOfLines={3} style={{ fontFamily: fonts.regular, fontSize: 10.6 * s, color: ink, marginTop: 3 * s, lineHeight: 13 * s }}>
+                  {a.address}
+                </Text>
+              ) : (
+                <View style={{ marginTop: 6 * s }}>
+                  <GrayBox w={'100%' as any} h={8 * s} s={s} />
+                  <GrayBox w={'75%' as any} h={8 * s} s={s} mt={3 * s} />
+                </View>
+              ))}
             <View style={{ marginTop: 'auto' }}>
               {!!a.aptdInspectBegin && (
                 <Text style={{ fontFamily: fonts.regular, fontSize: 10.6 * s, color: ink }}>

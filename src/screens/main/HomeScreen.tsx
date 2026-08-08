@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Dimensions, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -6,9 +6,17 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/types';
 import RealIdCard from '@/components/RealIdCard';
 import QrSheet from '@/components/QrSheet';
-import { MenuIcon, AddIcon, QrShowIcon, QrCaptureIcon } from '@/components/icons';
+import { MenuIcon, AddIcon, QrShowIcon, QrCaptureIcon, ClockIcon } from '@/components/icons';
 import { colors, fonts, spacing } from '@/theme';
 import { useWalletStore } from '@/data/store/walletStore';
+
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+function formatNow(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, '0');
+  const ap = d.getHours() < 12 ? '오전' : '오후';
+  const h12 = d.getHours() % 12 || 12;
+  return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} (${WEEKDAYS[d.getDay()]}) ${ap} ${p(h12)}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -25,11 +33,19 @@ export default function HomeScreen() {
   const [page, setPage] = useState(0);
   const [qrOpen, setQrOpen] = useState(false);
   const [areaH, setAreaH] = useState(0);
+  const [now, setNow] = useState(new Date());
   const listRef = useRef<FlatList>(null);
   const current = ids[page] ?? ids[0];
 
+  // 카드 위 실시간 시계 (위·변조 방지). 매초 갱신
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
   // v1은 카드(가로 355x217)를 90° 회전해 화면에서 세로로 크게 표시한다.
-  const cardLen = Math.min(areaH * 0.94, (width - H_PAD * 2) * (355 / 217));
+  // 카드 위 시계 영역(약 44dp)을 제외하고 크기를 줄여 배치.
+  const cardLen = Math.min((areaH - 52) * 0.82, (width - H_PAD * 2) * (355 / 217));
   const cardShort = cardLen / (355 / 217);
 
   return (
@@ -57,6 +73,10 @@ export default function HomeScreen() {
       ) : (
         <>
           <View style={styles.cardArea} onLayout={(e) => setAreaH(e.nativeEvent.layout.height)}>
+            <View style={styles.clockRow}>
+              <ClockIcon size={16} color={colors.textSecondary} />
+              <Text style={styles.clockText}>{formatNow(now)}</Text>
+            </View>
             {areaH > 0 && (
               <FlatList
                 ref={listRef}
@@ -125,6 +145,8 @@ const styles = StyleSheet.create({
   topBtn: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   title: { fontFamily: fonts.bold, fontSize: 18, color: '#111111' },
   cardArea: { flex: 1, justifyContent: 'center' },
+  clockRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: spacing.sm, marginBottom: spacing.sm },
+  clockText: { fontFamily: fonts.semibold, fontSize: 14, color: colors.textSecondary },
   page: { alignItems: 'center', justifyContent: 'center' },
   dots: { position: 'absolute', bottom: 8, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 6 },
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.border },

@@ -47,6 +47,7 @@ const H_PAD = spacing.lg;
 
 const illust = require('../../../assets/img/issue_complete.png');
 const rolling = require('../../../assets/img/rolling.png');
+const rollingInner = require('../../../assets/img/rolling_inner.png');
 
 // v1 fragment_main 대응: 상단바(메뉴/타이틀/발급) + 카드 + 하단 QR바 + QR 바텀시트
 export default function HomeScreen() {
@@ -67,16 +68,21 @@ export default function HomeScreen() {
     return () => clearInterval(t);
   }, []);
 
-  // 배경 행정안전부 엠블럼 회전 (v1 ani_main_rolling)
-  const spin = useRef(new Animated.Value(0)).current;
+  // 배경 행정안전부 엠블럼 (v1 ani_main_rolling): 바깥 텍스트링 CCW, 안쪽 태극 CW
+  const spinOuter = useRef(new Animated.Value(0)).current;
+  const spinInner = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    const anim = Animated.loop(
-      Animated.timing(spin, { toValue: 1, duration: 24000, easing: Easing.linear, useNativeDriver: true }),
-    );
-    anim.start();
-    return () => anim.stop();
+    const a1 = Animated.loop(Animated.timing(spinOuter, { toValue: 1, duration: 28000, easing: Easing.linear, useNativeDriver: true }));
+    const a2 = Animated.loop(Animated.timing(spinInner, { toValue: 1, duration: 20000, easing: Easing.linear, useNativeDriver: true }));
+    a1.start();
+    a2.start();
+    return () => {
+      a1.stop();
+      a2.stop();
+    };
   }, []);
-  const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+  const rotateCcw = spinOuter.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-360deg'] });
+  const rotateCw = spinInner.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
 
   // v1 카드 고정 크기(main_width 355 x main_height 217)를 90° 회전해 표시.
   const cardLen = Math.min(355, areaH * 0.86);
@@ -107,7 +113,8 @@ export default function HomeScreen() {
       ) : (
         <>
           <View style={styles.cardArea} onLayout={(e) => setAreaH(e.nativeEvent.layout.height)}>
-            <Animated.Image source={rolling} style={[styles.rolling, { transform: [{ rotate }] }]} resizeMode="contain" />
+            <Animated.Image source={rolling} style={[styles.rolling, { transform: [{ rotate: rotateCcw }] }]} resizeMode="contain" />
+            <Animated.Image source={rollingInner} style={[styles.rollingInner, { transform: [{ rotate: rotateCw }] }]} resizeMode="contain" />
             <View style={styles.clockRow}>
               <ClockIcon size={16} color={colors.textSecondary} />
               <Text style={styles.clockText}>{formatNow(now)}</Text>
@@ -211,6 +218,7 @@ const styles = StyleSheet.create({
   title: { fontFamily: fonts.bold, fontSize: 18, color: '#111111' },
   cardArea: { flex: 1, justifyContent: 'center' },
   rolling: { position: 'absolute', top: 4, right: -50, width: 230, height: 230, opacity: 0.9, pointerEvents: 'none' },
+  rollingInner: { position: 'absolute', top: 21, right: -33, width: 196, height: 196, opacity: 0.95, pointerEvents: 'none' },
   clockRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 2 },
   clockText: { fontFamily: fonts.semibold, fontSize: 14, color: colors.textSecondary },
   page: { alignItems: 'center', justifyContent: 'center' },

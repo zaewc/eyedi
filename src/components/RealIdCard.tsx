@@ -1,7 +1,32 @@
-import React from 'react';
-import { Image, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, Easing, Image, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, fonts } from '@/theme';
+
+function ShimmerBand({ w, h }: { w: number; h: number }) {
+  const t = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const a = Animated.loop(
+      Animated.timing(t, { toValue: 1, duration: 2800, delay: 300, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+    );
+    a.start();
+    return () => a.stop();
+  }, []);
+  const tx = t.interpolate({ inputRange: [0, 1], outputRange: [-w * 0.6, w * 1.3] });
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={{ position: 'absolute', top: -h * 0.3, bottom: -h * 0.3, width: w * 0.32, transform: [{ translateX: tx }, { rotate: '18deg' }] }}
+    >
+      <LinearGradient
+        colors={['rgba(255,255,255,0)', 'rgba(255,255,255,0.30)', 'rgba(255,255,255,0)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={{ flex: 1 }}
+      />
+    </Animated.View>
+  );
+}
 import { MobileId, vcTypeName, VcStatus, VC_STATUS_LABEL } from '@/types';
 
 const logo = require('../../assets/img/logo.png');
@@ -259,10 +284,11 @@ interface Props {
   id: MobileId;
   width: number;
   variant?: 'front' | 'full';
+  shimmer?: boolean;
   onPress?: () => void;
 }
 
-export default function RealIdCard({ id, width, variant = 'front', onPress }: Props) {
+export default function RealIdCard({ id, width, variant = 'front', shimmer = false, onPress }: Props) {
   const full = variant === 'full';
   const height = Math.round(width / CARD_RATIO);
   const s = width / CARD_W;
@@ -277,19 +303,25 @@ export default function RealIdCard({ id, width, variant = 'front', onPress }: Pr
       <GenericFace id={id} s={s} full={full} />
     );
 
+  const badge = !statusOk ? (
+    <View style={styles.statusBadge}>
+      <Text style={styles.statusText}>{VC_STATUS_LABEL[id.vcStatus]}</Text>
+    </View>
+  ) : null;
+  const shine = shimmer ? <ShimmerBand w={width} h={height} /> : null;
+
   const cardStyle = [styles.card, { width, height }];
   const Card = bg ? (
     <ImageBackground source={bg} resizeMode="cover" style={cardStyle} imageStyle={styles.bgImage}>
       {face}
-      {!statusOk && (
-        <View style={styles.statusBadge}>
-          <Text style={styles.statusText}>{VC_STATUS_LABEL[id.vcStatus]}</Text>
-        </View>
-      )}
+      {shine}
+      {badge}
     </ImageBackground>
   ) : (
     <LinearGradient colors={['#F6F8FB', '#E7ECF3']} style={cardStyle}>
       {face}
+      {shine}
+      {badge}
     </LinearGradient>
   );
 

@@ -70,7 +70,7 @@ export default function IdDetailScreen() {
         {id && (
           <Animated.View style={{ width: cardShort, height: cardLen, alignItems: 'center', justifyContent: 'center', transform: [{ scale }] }}>
             <View style={{ transform: [{ rotate: '90deg' }] }}>
-              <RealIdCard id={id} width={cardLen} variant="full" />
+              <RealIdCard id={id} width={cardLen} variant="full" shimmer />
             </View>
           </Animated.View>
         )}

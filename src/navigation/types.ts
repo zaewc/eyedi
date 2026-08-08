@@ -24,7 +24,13 @@ export type RootStackParamList = {
   PresentQR: { vcId: string };
   ScanQR: undefined;
   VerifyConfirm: { profile: VerifyProfile; vcId: string };
-  VerifyComplete: { verifier: string };
+  VerifyComplete: {
+    verifier: string;
+    purpose: string;
+    name: string;
+    photo: boolean;
+    disclosed: { label: string; value: string }[];
+  };
 
   Settings: undefined;
   UsageHistory: undefined;

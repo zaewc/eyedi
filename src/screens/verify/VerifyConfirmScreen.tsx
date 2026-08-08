@@ -31,15 +31,46 @@ export default function VerifyConfirmScreen() {
   const submit = async () => {
     if (!id) return;
     setSubmitting(true);
-    const disclosed: Record<string, string> = {};
+    const a = id as any;
+
+    // 승인된 항목 → 지갑(mock)의 실제 유저 정보 값으로 채운다
+    const valueFor = (key: string): string => {
+      switch (key) {
+        case 'name':
+          return a.name ?? '';
+        case 'birthday':
+          return a.birthday ?? a.birth ?? '';
+        case 'address':
+          return a.address ?? '';
+        case 'rrn':
+          return a.ihidNum ?? '';
+        case 'adult':
+          return '만 19세 이상';
+        default:
+          return String(a[key] ?? '제공');
+      }
+    };
+
+    const disclosedClaims: Record<string, string> = {};
+    const disclosed: { label: string; value: string }[] = [];
+    let sharePhoto = false;
     for (const c of profile.requestedClaims) {
-      if (selected[c.key]) disclosed[c.key] = String((id as any)[c.key] ?? '제공');
+      if (!selected[c.key]) continue;
+      if (c.key === 'photo') {
+        sharePhoto = true;
+        disclosedClaims['photo'] = '제공';
+        continue;
+      }
+      const v = valueFor(c.key);
+      disclosedClaims[c.key] = v;
+      if (c.key !== 'name') disclosed.push({ label: c.label, value: v || '-' });
     }
+
     const vp: VerifiablePresentation = {
       trxCode: profile.trxCode,
       vcId: id.vcId,
       vcType: id.vcType,
-      disclosedClaims: disclosed,
+      disclosedClaims,
       createdAt: new Date().toISOString(),
     };
     const result = await VpvService.submitPresentation(vp, profile.verifier);
@@ -50,7 +81,13 @@ export default function VerifyConfirmScreen() {
     await addHistory(profile.verifier, privacy);
     setSubmitting(false);
     if (result.success) {
-      navigation.replace('VerifyComplete', { verifier: profile.verifier });
+      navigation.replace('VerifyComplete', {
+        verifier: profile.verifier,
+        purpose: profile.purpose,
+        name: a.name ?? '',
+        photo: sharePhoto,
+        disclosed,
+      });
     }
   };
 

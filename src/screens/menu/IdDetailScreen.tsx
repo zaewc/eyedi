@@ -4,6 +4,8 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Accelerometer } from 'expo-sensors';
+import Svg, { Defs, RadialGradient, Stop, Circle } from 'react-native-svg';
 import { RootStackParamList } from '@/navigation/types';
 import RealIdCard from '@/components/RealIdCard';
 import { fonts, spacing } from '@/theme';
@@ -23,9 +25,23 @@ export default function IdDetailScreen() {
   const { vcId } = useRoute<Rt>().params;
   const id = useWalletStore((s) => s.getId(vcId));
 
-  // v1 카드 고정 크기(355) 기준으로 표시
-  const cardLen = Math.min(360, height * 0.5);
+  const cardLen = Math.min(420, height * 0.56);
   const cardShort = cardLen / (355 / 217);
+
+  // 기울임에 따라 움직이는 흰색 글레어(홀로그램) — 가속도계 기반
+  const glow = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  useEffect(() => {
+    Accelerometer.setUpdateInterval(60);
+    const sub = Accelerometer.addListener(({ x, y }) => {
+      Animated.spring(glow, {
+        toValue: { x: x * 60, y: -y * 60 },
+        useNativeDriver: true,
+        speed: 18,
+        bounciness: 3,
+      }).start();
+    });
+    return () => sub.remove();
+  }, []);
 
   // 진입 트랜지션: 카드 살짝 확대되며 등장
   const scale = useRef(new Animated.Value(0.9)).current;
@@ -52,6 +68,23 @@ export default function IdDetailScreen() {
 
   return (
     <LinearGradient colors={['#0F1C3D', '#0A1428']} style={styles.root}>
+      {/* 기울임에 따라 움직이는 흰색 글레어 */}
+      <Animated.View
+        style={[styles.glowWrap, { transform: [{ translateX: glow.x }, { translateY: glow.y }] }]}
+        pointerEvents="none"
+      >
+        <Svg width={width * 1.3} height={width * 1.3}>
+          <Defs>
+            <RadialGradient id="glow" cx="50%" cy="50%" r="50%">
+              <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.22} />
+              <Stop offset="45%" stopColor="#CFE0FF" stopOpacity={0.08} />
+              <Stop offset="100%" stopColor="#FFFFFF" stopOpacity={0} />
+            </RadialGradient>
+          </Defs>
+          <Circle cx={width * 0.65} cy={width * 0.65} r={width * 0.65} fill="url(#glow)" />
+        </Svg>
+      </Animated.View>
+
       {/* 배경 엠블럼 워터마크 */}
       <View style={styles.embWrap} pointerEvents="none">
         <Animated.Image
@@ -90,6 +123,7 @@ export default function IdDetailScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  glowWrap: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
   embWrap: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   bottom: { alignItems: 'center', gap: spacing.lg },

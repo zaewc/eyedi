@@ -1,7 +1,6 @@
 import React from 'react';
 import { Image, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { colors, fonts } from '@/theme';
 import { MobileId, vcTypeName, VcStatus, VC_STATUS_LABEL } from '@/types';
 
@@ -9,6 +8,7 @@ const logo = require('../../assets/img/logo.png');
 const mrcLogo = require('../../assets/img/cards/mrc_logo.png');
 const fingerBg = require('../../assets/img/cards/finger_bg.png');
 const mdlSeal = require('../../assets/img/cards/seal_mdl.jpg');
+const samplePhoto = require('../../assets/img/sample_img.jpg');
 
 const BG: Record<string, number> = {
   mdriverlic: require('../../assets/img/cards/bg_mdl.png'),
@@ -45,16 +45,6 @@ function issuerName(id: MobileId): string {
 
 function GrayBox({ w, h, s, mt = 0 }: { w: number; h: number; s: number; mt?: number }) {
   return <View style={{ width: w, height: h, borderRadius: 5 * s, backgroundColor: '#D9D9D9', marginTop: mt }} />;
-}
-
-function PortraitSilhouette({ w, h }: { w: number; h: number }) {
-  return (
-    <Svg width={w} height={h} viewBox="0 0 100 128">
-      <Rect x={0} y={0} width={100} height={128} rx={3} fill="#EDEFF2" />
-      <Circle cx={50} cy={46} r={22} fill="#C2C8D0" />
-      <Path d="M14,122 C14,90 30,76 50,76 C70,76 86,90 86,122 Z" fill="#C2C8D0" />
-    </Svg>
-  );
 }
 
 /** 주민등록증 전용 얼굴 — v1 main_mrc_detail.xml 재현 */
@@ -105,9 +95,9 @@ function ResidentFace({ id, s, full }: { id: MobileId; s: number; full: boolean 
               </Text>
             ) : (
               <View style={{ marginTop: 8 * s }}>
-                <GrayBox w={'100%' as any} h={9 * s} s={s} />
-                <GrayBox w={'100%' as any} h={9 * s} s={s} mt={4 * s} />
-                <GrayBox w={'62%' as any} h={9 * s} s={s} mt={4 * s} />
+                <GrayBox w={'100%' as any} h={13 * s} s={s} />
+                <GrayBox w={'100%' as any} h={13 * s} s={s} mt={5 * s} />
+                <GrayBox w={'62%' as any} h={13 * s} s={s} mt={5 * s} />
               </View>
             ))}
         </View>
@@ -115,7 +105,7 @@ function ResidentFace({ id, s, full }: { id: MobileId; s: number; full: boolean 
         {/* 우: 사진 */}
         <View style={{ width: 105 * s, marginTop: 5 * s }}>
           <View style={{ width: 105 * s, height: 134 * s, overflow: 'hidden', borderRadius: 2 * s }}>
-            <PortraitSilhouette w={105 * s} h={134 * s} />
+            <Image source={samplePhoto} style={{ width: 105 * s, height: 134 * s }} resizeMode="cover" />
           </View>
         </View>
       </View>
@@ -153,7 +143,7 @@ function DriverFace({ id, s, full }: { id: MobileId; s: number; full: boolean })
           </Text>
           <View style={{ flex: 1, justifyContent: 'flex-end' }}>
             <View style={{ width: 100 * s, height: 140 * s, overflow: 'hidden', borderRadius: 2 * s }}>
-              <PortraitSilhouette w={100 * s} h={140 * s} />
+              <Image source={samplePhoto} style={{ width: 100 * s, height: 140 * s }} resizeMode="cover" />
             </View>
           </View>
         </View>
@@ -239,7 +229,7 @@ function GenericFace({ id, s, full }: { id: MobileId; s: number; full: boolean }
       </View>
       <View style={{ flexDirection: 'row', flex: 1, alignItems: 'center', gap: 12 * s }}>
         <View style={{ width: 96 * s, height: 122 * s, overflow: 'hidden', borderRadius: 3 * s }}>
-          <PortraitSilhouette w={96 * s} h={122 * s} />
+          <Image source={samplePhoto} style={{ width: 96 * s, height: 122 * s }} resizeMode="cover" />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={{ fontFamily: fonts.bold, fontSize: 20 * s, color: '#3F434F' }} numberOfLines={1}>{name}</Text>

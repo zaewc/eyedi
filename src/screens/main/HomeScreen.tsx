@@ -118,6 +118,7 @@ export default function HomeScreen() {
                 data={ids}
                 horizontal
                 pagingEnabled
+                style={{ height: cardLen, flexGrow: 0 }}
                 showsHorizontalScrollIndicator={false}
                 keyExtractor={(item) => item.vcId}
                 snapToInterval={width}
@@ -213,8 +214,8 @@ const styles = StyleSheet.create({
   clockRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 2 },
   clockText: { fontFamily: fonts.semibold, fontSize: 14, color: colors.textSecondary },
   page: { alignItems: 'center', justifyContent: 'center' },
-  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: spacing.md },
-  cardBtnRow: { flexDirection: 'row', gap: 5, alignSelf: 'center', marginTop: spacing.md },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: spacing.sm },
+  cardBtnRow: { flexDirection: 'row', gap: 5, alignSelf: 'center', marginTop: spacing.sm },
   cardBtn: {
     flex: 1,
     paddingVertical: 12,

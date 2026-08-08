@@ -24,8 +24,9 @@ export default function ScanQRScreen() {
 
     try {
       const parsed = JSON.parse(data);
-      if (parsed?.type === 'mobileid-vp' && parsed.claims) {
-        const c = parsed.claims as Record<string, string>;
+      // v1 프로토콜 구조의 홀더 VP (msg='vp' + vp 객체)
+      if (parsed?.msg === 'vp' && parsed.vp) {
+        const c = (parsed._mock?.claims ?? {}) as Record<string, string>;
         const disclosed: { label: string; value: string }[] = [];
         if (c.birthday) disclosed.push({ label: '생년월일', value: c.birthday });
         if (c.address) disclosed.push({ label: '주소', value: c.address });
@@ -48,24 +49,24 @@ export default function ScanQRScreen() {
     navigation.replace('VerifyConfirm', { profile, vcId });
   };
 
-  // 단일 기기 데모용: 내 지갑 카드로 홀더 QR을 만들어 스캔한 것처럼 처리
-  const demoHolderQr = (): string => {
+  // 단일 기기 데모용: 내 지갑 카드로 실제 구조의 홀더 QR을 만들어 스캔한 것처럼 처리
+  const onDemo = async () => {
     const id = ids[0] as any;
-    if (!id) return '{"trxcode":"TRX-DEMO"}';
-    return JSON.stringify({
-      type: 'mobileid-vp',
-      ver: '2.0.0',
-      mode: 'cpm',
-      trxcode: 'CPM-DEMO',
+    if (!id) return;
+    const payload = await VpvService.createPresentationPayload({
+      trxCode: `CPM-DEMO-${Date.now()}`,
+      vcId: id.vcId,
       vcType: id.vcType,
-      claims: {
+      disclosedClaims: {
         name: id.name ?? '',
         birthday: id.birthday ?? id.birth ?? '',
         address: id.address ?? '',
         issuer: id.issuerName ?? id.issuernm ?? '',
         verified: 'true',
       },
+      createdAt: new Date().toISOString(),
     });
+    onScan(payload);
   };
 
   if (!permission) {
@@ -88,7 +89,7 @@ export default function ScanQRScreen() {
           <Button
             title="데모 QR로 계속"
             variant="ghost"
-            onPress={() => onScan(demoHolderQr())}
+            onPress={onDemo}
           />
         </View>
       </Screen>
@@ -108,7 +109,7 @@ export default function ScanQRScreen() {
         <Text style={styles.guide}>상대방의 '나의 QR'을{'\n'}사각형 안에 맞춰 주세요.</Text>
       </View>
       <View style={styles.demoBtn}>
-        <Pressable onPress={() => onScan(demoHolderQr())}>
+        <Pressable onPress={onDemo}>
           <Text style={styles.demoText}>데모 QR로 계속 →</Text>
         </Pressable>
       </View>

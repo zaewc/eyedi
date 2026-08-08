@@ -25,11 +25,19 @@ export default function QrSheet({ visible, id, onClose }: Props) {
     if (!visible || !id) return;
     let alive = true;
     const regen = async () => {
+      const a = id as any;
       const vp: VerifiablePresentation = {
         trxCode: `CPM-${Date.now()}`,
         vcId: id.vcId,
         vcType: id.vcType,
-        disclosedClaims: { name: (id as any).name ?? '' },
+        // 검증앱이 스캔해 그대로 확인할 실제 신원정보 (mock)
+        disclosedClaims: {
+          name: a.name ?? '',
+          birthday: a.birthday ?? a.birth ?? '',
+          address: a.address ?? '',
+          issuer: a.issuerName ?? a.issuernm ?? '',
+          verified: 'true',
+        },
         createdAt: new Date().toISOString(),
       };
       const p = await VpvService.createPresentationPayload(vp);

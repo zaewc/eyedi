@@ -17,12 +17,55 @@ export default function ScanQRScreen() {
   const ids = useWalletStore((s) => s.ids);
   const [handled, setHandled] = useState(false);
 
+  // 나의 QR(홀더가 제시한 QR)을 검증앱이 스캔 → 담긴 신원정보를 그대로 확인
   const onScan = async (data: string) => {
     if (handled) return;
     setHandled(true);
+
+    try {
+      const parsed = JSON.parse(data);
+      if (parsed?.type === 'mobileid-vp' && parsed.claims) {
+        const c = parsed.claims as Record<string, string>;
+        const disclosed: { label: string; value: string }[] = [];
+        if (c.birthday) disclosed.push({ label: '생년월일', value: c.birthday });
+        if (c.address) disclosed.push({ label: '주소', value: c.address });
+        if (c.issuer) disclosed.push({ label: '발급기관', value: c.issuer });
+        navigation.replace('VerifyComplete', {
+          verifier: '모바일 신분증 검증',
+          purpose: '신원 확인',
+          name: c.name ?? '',
+          photo: true,
+          disclosed,
+        });
+        return;
+      }
+    } catch {
+      // JSON 아님 → 검증자 요청 QR(MPM)로 처리
+    }
+
     const profile = await VpvService.parseVerifierQr(data);
     const vcId = ids[0]?.vcId ?? '';
     navigation.replace('VerifyConfirm', { profile, vcId });
+  };
+
+  // 단일 기기 데모용: 내 지갑 카드로 홀더 QR을 만들어 스캔한 것처럼 처리
+  const demoHolderQr = (): string => {
+    const id = ids[0] as any;
+    if (!id) return '{"trxcode":"TRX-DEMO"}';
+    return JSON.stringify({
+      type: 'mobileid-vp',
+      ver: '2.0.0',
+      mode: 'cpm',
+      trxcode: 'CPM-DEMO',
+      vcType: id.vcType,
+      claims: {
+        name: id.name ?? '',
+        birthday: id.birthday ?? id.birth ?? '',
+        address: id.address ?? '',
+        issuer: id.issuerName ?? id.issuernm ?? '',
+        verified: 'true',
+      },
+    });
   };
 
   if (!permission) {
@@ -45,7 +88,7 @@ export default function ScanQRScreen() {
           <Button
             title="데모 QR로 계속"
             variant="ghost"
-            onPress={() => onScan('{"trxcode":"TRX-DEMO"}')}
+            onPress={() => onScan(demoHolderQr())}
           />
         </View>
       </Screen>
@@ -62,10 +105,10 @@ export default function ScanQRScreen() {
       <Header title="QR 스캔" onBack={() => navigation.goBack()} light />
       <View style={styles.overlay} pointerEvents="none">
         <View style={styles.frame} />
-        <Text style={styles.guide}>검증 기관의 QR 코드를{'\n'}사각형 안에 맞춰 주세요.</Text>
+        <Text style={styles.guide}>상대방의 '나의 QR'을{'\n'}사각형 안에 맞춰 주세요.</Text>
       </View>
       <View style={styles.demoBtn}>
-        <Pressable onPress={() => onScan('{"trxcode":"TRX-DEMO"}')}>
+        <Pressable onPress={() => onScan(demoHolderQr())}>
           <Text style={styles.demoText}>데모 QR로 계속 →</Text>
         </Pressable>
       </View>

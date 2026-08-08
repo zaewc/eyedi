@@ -8,6 +8,7 @@ import { MobileId, vcTypeName, VcStatus, VC_STATUS_LABEL } from '@/types';
 const logo = require('../../assets/img/logo.png');
 const mrcLogo = require('../../assets/img/cards/mrc_logo.png');
 const fingerBg = require('../../assets/img/cards/finger_bg.png');
+const mdlSeal = require('../../assets/img/cards/seal_mdl.jpg');
 
 const BG: Record<string, number> = {
   mdriverlic: require('../../assets/img/cards/bg_mdl.png'),
@@ -121,7 +122,78 @@ function ResidentFace({ id, s, full }: { id: MobileId; s: number; full: boolean 
   );
 }
 
-/** 그 외 신분증(운전면허 등) 일반 얼굴 */
+/** 자동차운전면허증 전용 얼굴 — v1 main_mdl_detail.xml 재현 */
+function DriverFace({ id, s, full }: { id: MobileId; s: number; full: boolean }) {
+  const a = id as any;
+  const ink = '#3F434F';
+  const name = (a.name as string) ?? '';
+  const rrnDigits = (a.ihidNum ?? '').replace(/[^0-9]/g, '');
+  const birthPrev = rrnDigits.slice(0, 6);
+  const post = full ? rrnDigits.slice(6) : `${rrnDigits.slice(6, 7)}******`;
+
+  return (
+    <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, flexDirection: 'row' }}>
+        {/* 좌: 종별 설명 + 사진 */}
+        <View style={{ width: 110 * s, marginLeft: 15 * s, paddingTop: 7 * s, paddingBottom: 7 * s }}>
+          <Text style={{ fontFamily: fonts.regular, fontSize: 8.6 * s, color: ink, lineHeight: 11 * s }} numberOfLines={3}>
+            {a.asort || ''}
+          </Text>
+          <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+            <View style={{ width: 100 * s, height: 140 * s, overflow: 'hidden', borderRadius: 2 * s }}>
+              <PortraitSilhouette w={100 * s} h={140 * s} />
+            </View>
+          </View>
+        </View>
+
+        {/* 우: 제목/면허번호/성명/주민번호/주소/적성검사 */}
+        <View style={{ flex: 1, paddingLeft: 20 * s, paddingTop: 7 * s, paddingRight: 12 * s }}>
+          <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+            <Text style={{ fontFamily: fonts.bold, fontSize: 15.4 * s, color: ink }}>자동차운전면허증</Text>
+            <Text style={{ fontFamily: fonts.regular, fontSize: 9.6 * s, color: ink, marginLeft: 4 * s }}>(Driver's License)</Text>
+          </View>
+          {!!a.dlNo && <Text style={{ fontFamily: fonts.bold, fontSize: 15.4 * s, color: ink, marginTop: 2 * s }}>{a.dlNo}</Text>}
+
+          <View style={{ flex: 1, marginTop: 3 * s }}>
+            <Text numberOfLines={1} style={{ fontFamily: fonts.bold, fontSize: 15.4 * s, color: ink }}>{name}</Text>
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={{ fontFamily: fonts.bold, fontSize: 15.4 * s, color: ink }}>{birthPrev}-{post}</Text>
+            </View>
+            {!!a.address && (
+              <Text numberOfLines={3} style={{ fontFamily: fonts.regular, fontSize: 10.6 * s, color: ink, marginTop: 3 * s, lineHeight: 13 * s }}>
+                {a.address}
+              </Text>
+            )}
+            <View style={{ marginTop: 'auto' }}>
+              {!!a.aptdInspectBegin && (
+                <Text style={{ fontFamily: fonts.regular, fontSize: 10.6 * s, color: ink }}>
+                  적성검사 {a.aptdInspectBegin} ~ {a.aptdInspectEnd}
+                </Text>
+              )}
+              {!!a.conditionCode && (
+                <Text style={{ fontFamily: fonts.regular, fontSize: 10.6 * s, color: ink }}>조건 {a.conditionCode}</Text>
+              )}
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* 하단: 장기기증 · 발급일/발급기관 · 직인 */}
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginLeft: 18 * s, marginRight: 17 * s, marginBottom: 8 * s }}>
+        <Text style={{ fontFamily: fonts.regular, fontSize: 8.6 * s, color: ink }}>
+          {a.organDonation ? '장기기증 희망' : ''}
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+          <Text style={{ fontFamily: fonts.regular, fontSize: 9.6 * s, color: ink, marginRight: 8 * s }}>{id.vcIssuanceDate}</Text>
+          <Text style={{ fontFamily: fonts.bold, fontSize: 13.4 * s, color: ink, marginRight: 6 * s }}>{issuerName(id)}</Text>
+          <Image source={mdlSeal} style={{ width: 30 * s, height: 30 * s, borderRadius: 15 * s, opacity: 0.9 }} resizeMode="contain" />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+/** 그 외 신분증 일반 얼굴 */
 function GenericFace({ id, s, full }: { id: MobileId; s: number; full: boolean }) {
   const a = id as any;
   const name = (a.name as string) ?? '';
@@ -183,9 +255,14 @@ export default function RealIdCard({ id, width, variant = 'front', onPress }: Pr
   const s = width / CARD_W;
   const bg = BG[id.vcType] ?? null;
   const statusOk = id.vcStatus === VcStatus.NORMAL;
-  const isResident = id.vcType === 'identitycard';
-
-  const face = isResident ? <ResidentFace id={id} s={s} full={full} /> : <GenericFace id={id} s={s} full={full} />;
+  const face =
+    id.vcType === 'identitycard' ? (
+      <ResidentFace id={id} s={s} full={full} />
+    ) : id.vcType === 'mdriverlic' ? (
+      <DriverFace id={id} s={s} full={full} />
+    ) : (
+      <GenericFace id={id} s={s} full={full} />
+    );
 
   const cardStyle = [styles.card, { width, height }];
   const Card = bg ? (

@@ -45,7 +45,11 @@ export default function RootNavigator() {
       <Stack.Screen name="Main" component={HomeScreen} options={{ gestureEnabled: false }} />
       <Stack.Screen name="Apply" component={ApplyScreen} />
       <Stack.Screen name="Menu" component={MenuScreen} />
-      <Stack.Screen name="IdDetail" component={IdDetailScreen} />
+      <Stack.Screen
+        name="IdDetail"
+        component={IdDetailScreen}
+        options={{ presentation: 'transparentModal', animation: 'fade', animationDuration: 250 }}
+      />
 
       <Stack.Screen name="IssueConfirm" component={IssueConfirmScreen} />
       <Stack.Screen

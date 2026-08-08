@@ -20,10 +20,10 @@ export const mockDriverLicense: DriverLicense = {
   isMasking: true,
   isOnline: true,
   isSelected: false,
-  name: '홍길동',
-  birthday: '1990-01-01',
+  name: '송재욱',
+  birthday: '2007-07-28',
   sex: '남',
-  address: '서울특별시 종로구 세종대로 209',
+  address: '광주전남통합특별시 남구 봉선중앙로 46, 107동 1001호 (봉선동, 삼익아파트)',
   dlNo: '11-90-123456-01',
   asort: '제1종 보통',
   conditionCode: '',
@@ -32,7 +32,7 @@ export const mockDriverLicense: DriverLicense = {
   aptdInspectBegin: '2032-01-01',
   aptdInspectEnd: '2032-12-31',
   organDonation: 0,
-  ihidNum: '900101-1******',
+  ihidNum: '070728-3553310',
 };
 
 export const mockResidentCertificate: ResidentCertificate = {

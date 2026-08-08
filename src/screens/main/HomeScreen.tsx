@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Easing, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Dimensions, Easing, FlatList, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,6 +9,28 @@ import QrSheet from '@/components/QrSheet';
 import { MenuIcon, AddIcon, QrShowIcon, QrCaptureIcon, ClockIcon } from '@/components/icons';
 import { colors, fonts, spacing } from '@/theme';
 import { useWalletStore } from '@/data/store/walletStore';
+
+// v1 bottom_sheet_legal_* 문구 (mrc는 문자열 미제공 → 표준 문구)
+const LEGAL: Record<string, { title: string; main: string; sub: string }> = {
+  mdriverlic: {
+    title: '모바일 운전면허증의 법적 효력',
+    main: '모바일 운전면허증은 도로교통법 제85조의2에 따라 일반 운전면허증과 동일하게 사용할 수 있습니다.',
+    sub: '관계기관 등에서는 모바일 운전면허증이 원활히 사용될 수 있도록 협조하여 주시기 바랍니다.',
+  },
+  identitycard: {
+    title: '모바일 주민등록증의 법적 효력',
+    main: '모바일 주민등록증은 관계 법령에 따라 실물 주민등록증과 동일한 효력을 가집니다.',
+    sub: '관계기관 등에서는 모바일 주민등록증이 원활히 사용될 수 있도록 협조하여 주시기 바랍니다.',
+  },
+  nationmerit: {
+    title: '모바일 국가보훈등록증의 법적 효력',
+    main: '모바일 국가보훈등록증은 관계 법령에 따라 실물 국가보훈등록증과 동일한 효력을 가집니다.',
+    sub: '관계기관 등에서는 모바일 국가보훈등록증이 원활히 사용될 수 있도록 협조하여 주시기 바랍니다.',
+  },
+};
+function legalFor(t: string) {
+  return LEGAL[t] ?? { title: '법적 효력', main: '실물 신분증과 동일한 효력을 가집니다.', sub: '' };
+}
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 function formatNow(d: Date): string {
@@ -33,6 +55,7 @@ export default function HomeScreen() {
   const ids = useWalletStore((s) => s.ids);
   const [page, setPage] = useState(0);
   const [qrOpen, setQrOpen] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
   const [areaH, setAreaH] = useState(0);
   const [now, setNow] = useState(new Date());
   const listRef = useRef<FlatList>(null);
@@ -123,6 +146,19 @@ export default function HomeScreen() {
                 ))}
               </View>
             )}
+
+            {/* 카드 하단: 크게 보기 | 법적 효력 (v1 fragment_main_detail) */}
+            <View style={[styles.cardBtnRow, { width: cardShort }]}>
+              <Pressable
+                style={styles.cardBtn}
+                onPress={() => current && navigation.navigate('IdDetail', { vcId: current.vcId })}
+              >
+                <Text style={styles.cardBtnText}>크게 보기</Text>
+              </Pressable>
+              <Pressable style={styles.cardBtn} onPress={() => setLegalOpen(true)}>
+                <Text style={styles.cardBtnText}>법적 효력</Text>
+              </Pressable>
+            </View>
           </View>
 
           {/* 하단 QR 바: 나의 QR | QR 촬영 */}
@@ -141,6 +177,22 @@ export default function HomeScreen() {
       )}
 
       <QrSheet visible={qrOpen} id={current} onClose={() => setQrOpen(false)} />
+
+      <Modal visible={legalOpen} transparent animationType="slide" onRequestClose={() => setLegalOpen(false)}>
+        <Pressable style={styles.legalBackdrop} onPress={() => setLegalOpen(false)}>
+          <Pressable style={[styles.legalSheet, { paddingBottom: insets.bottom + spacing.xl }]} onPress={() => {}}>
+            <View style={styles.legalHandle} />
+            <Text style={styles.legalTitle}>{legalFor(current?.vcType ?? '').title}</Text>
+            <Text style={styles.legalMain}>{legalFor(current?.vcType ?? '').main}</Text>
+            {!!legalFor(current?.vcType ?? '').sub && (
+              <Text style={styles.legalSub}>{legalFor(current?.vcType ?? '').sub}</Text>
+            )}
+            <Pressable style={styles.legalClose} onPress={() => setLegalOpen(false)}>
+              <Text style={styles.legalCloseText}>확인</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -158,10 +210,29 @@ const styles = StyleSheet.create({
   title: { fontFamily: fonts.bold, fontSize: 18, color: '#111111' },
   cardArea: { flex: 1, justifyContent: 'center' },
   rolling: { position: 'absolute', top: 4, right: -50, width: 230, height: 230, opacity: 0.9, pointerEvents: 'none' },
-  clockRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: spacing.xs },
+  clockRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 2 },
   clockText: { fontFamily: fonts.semibold, fontSize: 14, color: colors.textSecondary },
   page: { alignItems: 'center', justifyContent: 'center' },
-  dots: { position: 'absolute', bottom: 8, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 6 },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: spacing.md },
+  cardBtnRow: { flexDirection: 'row', gap: 5, alignSelf: 'center', marginTop: spacing.md },
+  cardBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E0E4EA',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+  },
+  cardBtnText: { fontFamily: fonts.semibold, fontSize: 16, color: '#111111' },
+  legalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
+  legalSheet: { backgroundColor: colors.background, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingTop: spacing.md, paddingHorizontal: spacing.lg },
+  legalHandle: { width: 80, height: 5, borderRadius: 3, backgroundColor: '#E2E2E2', alignSelf: 'center', marginBottom: spacing.lg },
+  legalTitle: { fontFamily: fonts.bold, fontSize: 19, color: '#111111', marginBottom: spacing.md },
+  legalMain: { fontFamily: fonts.semibold, fontSize: 15, color: colors.text, lineHeight: 23 },
+  legalSub: { fontFamily: fonts.regular, fontSize: 14, color: colors.textSecondary, lineHeight: 21, marginTop: spacing.md },
+  legalClose: { marginTop: spacing.xl, height: 52, borderRadius: 12, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+  legalCloseText: { fontFamily: fonts.bold, fontSize: 16, color: colors.textInverse },
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.border },
   dotActive: { backgroundColor: colors.primary, width: 18 },
   bottomBar: {

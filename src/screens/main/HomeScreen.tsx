@@ -24,6 +24,7 @@ const { width } = Dimensions.get('window');
 const H_PAD = spacing.lg;
 
 const illust = require('../../../assets/img/issue_complete.png');
+const rolling = require('../../../assets/img/rolling.png');
 
 // v1 fragment_main 대응: 상단바(메뉴/타이틀/발급) + 카드 + 하단 QR바 + QR 바텀시트
 export default function HomeScreen() {
@@ -73,6 +74,7 @@ export default function HomeScreen() {
       ) : (
         <>
           <View style={styles.cardArea} onLayout={(e) => setAreaH(e.nativeEvent.layout.height)}>
+            <Image source={rolling} style={styles.rolling} resizeMode="contain" pointerEvents="none" />
             <View style={styles.clockRow}>
               <ClockIcon size={16} color={colors.textSecondary} />
               <Text style={styles.clockText}>{formatNow(now)}</Text>
@@ -144,8 +146,9 @@ const styles = StyleSheet.create({
   },
   topBtn: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   title: { fontFamily: fonts.bold, fontSize: 18, color: '#111111' },
-  cardArea: { flex: 1, justifyContent: 'center' },
-  clockRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: spacing.sm, marginBottom: spacing.sm },
+  cardArea: { flex: 1, justifyContent: 'flex-start' },
+  rolling: { position: 'absolute', top: 4, right: -50, width: 230, height: 230, opacity: 0.9 },
+  clockRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: spacing.md, marginBottom: spacing.sm },
   clockText: { fontFamily: fonts.semibold, fontSize: 14, color: colors.textSecondary },
   page: { alignItems: 'center', justifyContent: 'center' },
   dots: { position: 'absolute', bottom: 8, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 6 },

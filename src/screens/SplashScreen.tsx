@@ -35,9 +35,10 @@ export default function SplashScreen() {
   return (
     <View style={styles.root}>
       <View style={styles.center}>
-        <Image source={logo} style={styles.logo} resizeMode="contain" />
-        <Text style={styles.title}>대한민국 모바일 신분증</Text>
-        <Text style={styles.subtitle}>Mobile Identification</Text>
+        <View style={styles.brandRow}>
+          <Image source={logo} style={styles.logo} resizeMode="contain" />
+          <Text style={styles.title}>모바일 신분증</Text>
+        </View>
       </View>
       <ActivityIndicator color={colors.primary} style={styles.loader} />
       <Image source={wave} style={styles.wave} resizeMode="stretch" />
@@ -49,9 +50,9 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
   center: { alignItems: 'center' },
-  logo: { width: 96, height: 96, marginBottom: spacing.lg },
-  title: { fontFamily: fonts.bold, fontSize: 24, color: colors.navyText },
-  subtitle: { fontFamily: fonts.regular, fontSize: 13, color: colors.textTertiary, marginTop: 6, letterSpacing: 1 },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  logo: { width: 30, height: 27 },
+  title: { fontFamily: fonts.semibold, fontSize: 22, color: '#000000' },
   loader: { position: 'absolute', bottom: 150 },
   wave: { position: 'absolute', bottom: 0, left: 0, right: 0, width: '100%', height: 120 },
   gov: { position: 'absolute', bottom: 40, fontFamily: fonts.semibold, fontSize: 13, color: '#6E86A8' },

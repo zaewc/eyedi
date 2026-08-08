@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Dimensions, Easing, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -44,8 +44,19 @@ export default function HomeScreen() {
     return () => clearInterval(t);
   }, []);
 
-  // v1은 카드(가로 355x217)를 90° 회전해 세로로 표시. v1보다 컸어서 축소.
-  const cardLen = Math.min(areaH * 0.72, (width - H_PAD * 2) * (355 / 217));
+  // 배경 행정안전부 엠블럼 회전 (v1 ani_main_rolling)
+  const spin = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.timing(spin, { toValue: 1, duration: 24000, easing: Easing.linear, useNativeDriver: true }),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, []);
+  const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+
+  // v1 카드 고정 크기(main_width 355 x main_height 217)를 90° 회전해 표시.
+  const cardLen = Math.min(355, areaH * 0.86);
   const cardShort = cardLen / (355 / 217);
 
   return (
@@ -73,7 +84,7 @@ export default function HomeScreen() {
       ) : (
         <>
           <View style={styles.cardArea} onLayout={(e) => setAreaH(e.nativeEvent.layout.height)}>
-            <Image source={rolling} style={styles.rolling} resizeMode="contain" />
+            <Animated.Image source={rolling} style={[styles.rolling, { transform: [{ rotate }] }]} resizeMode="contain" />
             <View style={styles.clockRow}>
               <ClockIcon size={16} color={colors.textSecondary} />
               <Text style={styles.clockText}>{formatNow(now)}</Text>

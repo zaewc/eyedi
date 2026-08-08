@@ -40,6 +40,21 @@ function formatNow(d: Date): string {
   return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} (${WEEKDAYS[d.getDay()]}) ${ap} ${p(h12)}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
 }
 
+// 시계만 매초 갱신되도록 분리 (홈 전체 리렌더 방지 → 엠블럼 애니 끊김 해결)
+function LiveClock() {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <View style={styles.clockRow}>
+      <ClockIcon size={16} color={colors.textSecondary} />
+      <Text style={styles.clockText}>{formatNow(now)}</Text>
+    </View>
+  );
+}
+
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 const { width } = Dimensions.get('window');
@@ -58,15 +73,8 @@ export default function HomeScreen() {
   const [qrOpen, setQrOpen] = useState(false);
   const [legalOpen, setLegalOpen] = useState(false);
   const [areaH, setAreaH] = useState(0);
-  const [now, setNow] = useState(new Date());
   const listRef = useRef<FlatList>(null);
   const current = ids[page] ?? ids[0];
-
-  // 카드 위 실시간 시계 (위·변조 방지). 매초 갱신
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
 
   // 배경 행정안전부 엠블럼 (v1 ani_main_rolling): 바깥 텍스트링 CCW, 안쪽 태극 CW
   const spinOuter = useRef(new Animated.Value(0)).current;
@@ -115,10 +123,7 @@ export default function HomeScreen() {
           <View style={styles.cardArea} onLayout={(e) => setAreaH(e.nativeEvent.layout.height)}>
             <Animated.Image source={rolling} style={[styles.rolling, { transform: [{ rotate: rotateCcw }] }]} resizeMode="contain" />
             <Animated.Image source={rollingInner} style={[styles.rollingInner, { transform: [{ rotate: rotateCw }] }]} resizeMode="contain" />
-            <View style={styles.clockRow}>
-              <ClockIcon size={16} color={colors.textSecondary} />
-              <Text style={styles.clockText}>{formatNow(now)}</Text>
-            </View>
+            <LiveClock />
             {areaH > 0 && (
               <FlatList
                 ref={listRef}

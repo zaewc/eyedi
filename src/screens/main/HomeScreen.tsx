@@ -24,9 +24,13 @@ export default function HomeScreen() {
   const ids = useWalletStore((s) => s.ids);
   const [page, setPage] = useState(0);
   const [qrOpen, setQrOpen] = useState(false);
+  const [areaH, setAreaH] = useState(0);
   const listRef = useRef<FlatList>(null);
   const current = ids[page] ?? ids[0];
-  const cardW = width - H_PAD * 2;
+
+  // v1은 카드(가로 355x217)를 90° 회전해 화면에서 세로로 크게 표시한다.
+  const cardLen = Math.min(areaH * 0.94, (width - H_PAD * 2) * (355 / 217));
+  const cardShort = cardLen / (355 / 217);
 
   return (
     <View style={styles.root}>
@@ -52,28 +56,34 @@ export default function HomeScreen() {
         </View>
       ) : (
         <>
-          <View style={styles.cardArea}>
-            <FlatList
-              ref={listRef}
-              data={ids}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={(item) => item.vcId}
-              snapToInterval={width}
-              decelerationRate="fast"
-              onMomentumScrollEnd={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / width))}
-              renderItem={({ item }) => (
-                <View style={[styles.page, { width }]}>
-                  <RealIdCard
-                    id={item}
-                    width={cardW}
-                    variant="front"
-                    onPress={() => navigation.navigate('IdDetail', { vcId: item.vcId })}
-                  />
-                </View>
-              )}
-            />
+          <View style={styles.cardArea} onLayout={(e) => setAreaH(e.nativeEvent.layout.height)}>
+            {areaH > 0 && (
+              <FlatList
+                ref={listRef}
+                data={ids}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(item) => item.vcId}
+                snapToInterval={width}
+                decelerationRate="fast"
+                onMomentumScrollEnd={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / width))}
+                renderItem={({ item }) => (
+                  <View style={[styles.page, { width }]}>
+                    <View style={{ width: cardShort, height: cardLen, alignItems: 'center', justifyContent: 'center' }}>
+                      <View style={{ transform: [{ rotate: '90deg' }] }}>
+                        <RealIdCard
+                          id={item}
+                          width={cardLen}
+                          variant="front"
+                          onPress={() => navigation.navigate('IdDetail', { vcId: item.vcId })}
+                        />
+                      </View>
+                    </View>
+                  </View>
+                )}
+              />
+            )}
             {ids.length > 1 && (
               <View style={styles.dots}>
                 {ids.map((_, i) => (
@@ -116,7 +126,7 @@ const styles = StyleSheet.create({
   title: { fontFamily: fonts.bold, fontSize: 18, color: '#111111' },
   cardArea: { flex: 1, justifyContent: 'center' },
   page: { alignItems: 'center', justifyContent: 'center' },
-  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: spacing.lg },
+  dots: { position: 'absolute', bottom: 8, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 6 },
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.border },
   dotActive: { backgroundColor: colors.primary, width: 18 },
   bottomBar: {

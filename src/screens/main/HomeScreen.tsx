@@ -49,8 +49,10 @@ function LiveClock() {
   }, []);
   return (
     <View style={styles.clockRow}>
-      <ClockIcon size={20} color="#000000" />
-      <Text style={styles.clockText}>{formatNow(now)}</Text>
+      <ClockIcon size={22} color="#000000" />
+      <Text style={styles.clockText} numberOfLines={1} adjustsFontSizeToFit>
+        {formatNow(now)}
+      </Text>
     </View>
   );
 }
@@ -225,7 +227,7 @@ const styles = StyleSheet.create({
   rolling: { position: 'absolute', top: 4, right: -50, width: 230, height: 230, opacity: 0.9, pointerEvents: 'none' },
   rollingInner: { position: 'absolute', top: 21, right: -33, width: 196, height: 196, opacity: 0.95, pointerEvents: 'none' },
   clockRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 28 },
-  clockText: { fontFamily: fonts.semibold, fontSize: 18, lineHeight: 26, color: '#000000' },
+  clockText: { fontFamily: fonts.semibold, fontSize: 20, lineHeight: 28, color: '#000000' },
   page: { alignItems: 'center', justifyContent: 'center' },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: spacing.sm },
   cardBtnRow: { flexDirection: 'row', gap: 5, alignSelf: 'center', marginTop: spacing.sm },

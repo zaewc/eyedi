@@ -49,7 +49,7 @@ function LiveClock() {
   }, []);
   return (
     <View style={styles.clockRow}>
-      <ClockIcon size={16} color={colors.textSecondary} />
+      <ClockIcon size={20} color="#000000" />
       <Text style={styles.clockText}>{formatNow(now)}</Text>
     </View>
   );
@@ -92,8 +92,8 @@ export default function HomeScreen() {
   const rotateCcw = spinOuter.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-360deg'] });
   const rotateCw = spinInner.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
 
-  // v1 카드 고정 크기(main_width 355 x main_height 217)를 90° 회전해 표시.
-  const cardLen = Math.min(355, areaH * 0.86);
+  // 회전한 카드 비율을 유지하면서 시계와 하단 버튼 공간을 확보한다.
+  const cardLen = Math.max(0, Math.min(430, (width - H_PAD * 2) * (355 / 217), areaH - 140));
   const cardShort = cardLen / (355 / 217);
 
   return (
@@ -224,8 +224,8 @@ const styles = StyleSheet.create({
   cardArea: { flex: 1, justifyContent: 'center' },
   rolling: { position: 'absolute', top: 4, right: -50, width: 230, height: 230, opacity: 0.9, pointerEvents: 'none' },
   rollingInner: { position: 'absolute', top: 21, right: -33, width: 196, height: 196, opacity: 0.95, pointerEvents: 'none' },
-  clockRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 2 },
-  clockText: { fontFamily: fonts.semibold, fontSize: 14, color: colors.textSecondary },
+  clockRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 28 },
+  clockText: { fontFamily: fonts.semibold, fontSize: 18, lineHeight: 26, color: '#000000' },
   page: { alignItems: 'center', justifyContent: 'center' },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: spacing.sm },
   cardBtnRow: { flexDirection: 'row', gap: 5, alignSelf: 'center', marginTop: spacing.sm },

@@ -21,7 +21,7 @@ export const mockDriverLicense: DriverLicense = {
   isOnline: true,
   isSelected: false,
   name: '송재욱',
-  birthday: '2007-07-28',
+  birthday: '2002-07-28',
   sex: '남',
   address: '광주전남통합특별시 남구 봉선중앙로 46, 107동 1001호 (봉선동, 삼익아파트)',
   dlNo: '11-90-123456-01',
@@ -32,7 +32,7 @@ export const mockDriverLicense: DriverLicense = {
   aptdInspectBegin: '2032-01-01',
   aptdInspectEnd: '2032-12-31',
   organDonation: 0,
-  ihidNum: '070728-3553310',
+  ihidNum: '020728-3553310',
 };
 
 export const mockResidentCertificate: ResidentCertificate = {
@@ -49,10 +49,10 @@ export const mockResidentCertificate: ResidentCertificate = {
   isOnline: true,
   isSelected: false,
   name: '송재욱',
-  birthday: '2007-07-28',
+  birthday: '2002-07-28',
   sex: '남',
   address: '광주전남통합특별시 남구 봉선중앙로 46, 107동 1001호 (봉선동, 삼익아파트)',
-  ihidNum: '070728-3553310',
+  ihidNum: '020728-3553310',
   issude: '2022-11-10',
   issuernm: '광주광역시 남구청장',
   foreignflag: 'N',

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MobileId, UsageHistory, vcTypeName } from '@/types';
-import { mockUsageHistory } from '@/data/mock/mockData';
+import { mockUsageHistory, issuedSampleByType } from '@/data/mock/mockData';
 
 const KEY_WALLET = 'mobileid.wallet';
 const KEY_HISTORY = 'mobileid.history';
@@ -17,6 +17,16 @@ interface WalletState {
   getId: (vcId: string) => MobileId | undefined;
   addHistory: (verifier: string, privacy: string) => Promise<void>;
   clear: () => Promise<void>;
+}
+
+// 저장된 신분증은 발급 시점의 값으로 굳어 있어, mock 템플릿을 고쳐도 반영되지 않는다.
+// 데모 앱이므로 hydrate 시 같은 vcType의 최신 mock 내용으로 갱신하고 vcId만 유지한다.
+function refreshFromMock(ids: MobileId[]): MobileId[] {
+  return ids.map((id) => {
+    const sample = issuedSampleByType[id.vcType];
+    if (!sample) return id;
+    return { ...sample, vcId: id.vcId, isSelected: id.isSelected } as MobileId;
+  });
 }
 
 async function persistIds(ids: MobileId[]) {
@@ -36,11 +46,13 @@ export const useWalletStore = create<WalletState>((set, get) => ({
       AsyncStorage.getItem(KEY_WALLET),
       AsyncStorage.getItem(KEY_HISTORY),
     ]);
+    const ids = rawIds ? refreshFromMock(JSON.parse(rawIds) as MobileId[]) : [];
     set({
       hydrated: true,
-      ids: rawIds ? (JSON.parse(rawIds) as MobileId[]) : [],
+      ids,
       history: rawHistory ? (JSON.parse(rawHistory) as UsageHistory[]) : mockUsageHistory,
     });
+    if (rawIds) await persistIds(ids);
   },
 
   async addId(id: MobileId) {
